@@ -8,11 +8,11 @@ class Required(private val r: Any) {
         return "Required($r)"
     }
 
-    fun encode(n: Any): Any {
+    fun encode(n: Int): ByteArray {
         return r
     }
 
-    fun decode(n: Any) {
+    fun decode(n: ByteArray): Int {
         if (n != r) {
             throw IllegalArgumentException("Required($r) != $n")
         }

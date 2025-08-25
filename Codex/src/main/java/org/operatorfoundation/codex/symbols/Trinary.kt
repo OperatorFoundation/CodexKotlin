@@ -8,7 +8,7 @@ class Trinary {
         return "Trinary"
     }
 
-    fun decode(n: String): Int {
+    fun decode(n: ByteArray): Int {
         return when (n) {
             "0" -> 0
             "1" -> 1
@@ -17,7 +17,7 @@ class Trinary {
         }
     }
 
-    fun encode(n: Int): String {
+    fun encode(n: Int): ByteArray {
         return when (n) {
             0 -> "0"
             1 -> "1"

@@ -8,7 +8,7 @@ class GridLetter {
         return "GridLetter"
     }
 
-    fun decode(n: String): Int {
+    fun decode(n: ByteArray): Int {
         return when (n) {
             "A" -> 0
             "B" -> 1
@@ -25,7 +25,7 @@ class GridLetter {
         }
     }
 
-    fun encode(n: Int): String {
+    fun encode(n: Int): ByteArray {
         return when (n) {
             0 -> "A"
             1 -> "B"

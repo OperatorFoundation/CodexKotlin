@@ -8,7 +8,7 @@ class CallLetterNumber {
         return "CallLetterNumber"
     }
 
-    fun decode(n: String): Int {
+    fun decode(n: ByteArray): Int {
         return when (n) {
             "A" -> 0
             "B" -> 1
@@ -50,7 +50,7 @@ class CallLetterNumber {
         }
     }
 
-    fun encode(n: Int): String {
+    fun encode(n: Int): ByteArray {
         return when (n) {
             0 -> "A"
             1 -> "B"

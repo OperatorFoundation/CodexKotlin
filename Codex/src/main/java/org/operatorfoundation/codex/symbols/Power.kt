@@ -8,7 +8,7 @@ class Power {
         return "Power"
     }
 
-    fun decode(n: String): Int {
+    fun decode(n: ByteArray): Int {
         return when (n) {
             "0" -> 0
             "3" -> 1
@@ -33,7 +33,7 @@ class Power {
         }
     }
 
-    fun encode(n: Int): String {
+    fun encode(n: Int): ByteArray {
         return when (n) {
             0 -> "0"
             1 -> "3"
