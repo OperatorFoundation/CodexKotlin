@@ -9,19 +9,26 @@ package org.operatorfoundation.Codex.Symbols
 interface Symbol
 {
     /**
-     * Returns the number of possible values this symbol can represent
+     * Returns the number of possible values this symbol can represent.
+     * For example, Binary returns 2, Byte returns 256.
      */
     fun size(): Int
 
     /**
-     * Decodes a value using this symbol
-     * @param n Can be Char, String, or Int depending on the symbol
+     * Decodes an input value (Char, String, or Int) to its numeric representation.
+     * For example, CallLetterNumber decodes 'A' to 0, 'B' to 1, etc.
+     *
+     * @param encodedValue Can be Char, String, or Int depending on the symbol
+     * @return The decoded integer value
      */
-    fun decode(n: Any): Int
+    fun decode(encodedValue: Any): Int
 
     /**
-     * Encodes a value using this symbol
+     * Encodes a numeric value to its symbol representation.
+     * For example, CallLetterNumber encodes 0 to 'A', 1 to 'B', etc.
+     *
+     * @param numericValue The integer to encode
      * @return Can be Char, String, or Int depending on the symbol
      */
-    fun encode(i: Int): Any
+    fun encode(numericValue: Int): Any
 }
