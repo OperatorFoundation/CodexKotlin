@@ -1,28 +1,30 @@
-package org.operatorfoundation.codex.Symbols
+package org.operatorfoundation.codex.symbols
 
-class Trinary {
-    val length: Int
-        get() = 3
+class Trinary : Symbol {
+    override fun size(): Int
+    {
+        return 3
+    }
 
     override fun toString(): String {
         return "Trinary"
     }
 
-    fun decode(n: ByteArray): Int {
-        return when (n) {
+    override fun decode(encodedValue: ByteArray): Int {
+        return when (encodedValue.toString()) {
             "0" -> 0
             "1" -> 1
             "2" -> 2
-            else -> throw IllegalArgumentException("Trinary, bad value $n")
+            else -> throw IllegalArgumentException("Trinary, bad value $encodedValue")
         }
     }
 
-    fun encode(n: Int): ByteArray {
-        return when (n) {
-            0 -> "0"
-            1 -> "1"
-            2 -> "2"
-            else -> throw IllegalArgumentException("Unknown value $n for Trinary")
+    override fun encode(numericValue: Int): ByteArray {
+        return when (numericValue) {
+            0 -> "0".toByteArray()
+            1 -> "1".toByteArray()
+            2 -> "2".toByteArray()
+            else -> throw IllegalArgumentException("Unknown value $numericValue for Trinary")
         }
     }
 }

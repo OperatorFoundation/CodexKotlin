@@ -1,15 +1,17 @@
-package org.operatorfoundation.codex.Symbols
+package org.operatorfoundation.codex.symbols
 
-class Power {
-    val length: Int
-        get() = 19
+class Power : Symbol {
+    override fun size(): Int
+    {
+        return 19
+    }
 
     override fun toString(): String {
         return "Power"
     }
 
-    fun decode(n: ByteArray): Int {
-        return when (n) {
+    override fun decode(encodedValue: ByteArray): Int {
+        return when (encodedValue.toString()) {
             "0" -> 0
             "3" -> 1
             "7" -> 2
@@ -29,32 +31,32 @@ class Power {
             "53" -> 16
             "57" -> 17
             "60" -> 18
-            else -> throw IllegalArgumentException("Power, bad value $n")
+            else -> throw IllegalArgumentException("Power, bad value $encodedValue")
         }
     }
 
-    fun encode(n: Int): ByteArray {
-        return when (n) {
-            0 -> "0"
-            1 -> "3"
-            2 -> "7"
-            3 -> "10"
-            4 -> "13"
-            5 -> "17"
-            6 -> "20"
-            7 -> "23"
-            8 -> "27"
-            9 -> "30"
-            10 -> "33"
-            11 -> "37"
-            12 -> "40"
-            13 -> "43"
-            14 -> "47"
-            15 -> "50"
-            16 -> "53"
-            17 -> "57"
-            18 -> "60"
-            else -> throw IllegalArgumentException("Invalid value $n for Power")
+    override fun encode(numericValue: Int): ByteArray {
+        return when (numericValue) {
+            0 -> "0".toByteArray()
+            1 -> "3".toByteArray()
+            2 -> "7".toByteArray()
+            3 -> "10".toByteArray()
+            4 -> "13".toByteArray()
+            5 -> "17".toByteArray()
+            6 -> "20".toByteArray()
+            7 -> "23".toByteArray()
+            8 -> "27".toByteArray()
+            9 -> "30".toByteArray()
+            10 -> "33".toByteArray()
+            11 -> "37".toByteArray()
+            12 -> "40".toByteArray()
+            13 -> "43".toByteArray()
+            14 -> "47".toByteArray()
+            15 -> "50".toByteArray()
+            16 -> "53".toByteArray()
+            17 -> "57".toByteArray()
+            18 -> "60".toByteArray()
+            else -> throw IllegalArgumentException("Invalid value $numericValue for Power")
         }
     }
 }

@@ -9,8 +9,8 @@ class CallLetterNumber : Symbol {
         return "CallLetterNumber"
     }
 
-    override fun decode(n: ByteArray): Int {
-        return when (n.toString()) {
+    override fun decode(encodedValue: ByteArray): Int {
+        return when (encodedValue.toString()) {
             "A" -> 0
             "B" -> 1
             "C" -> 2
@@ -47,12 +47,12 @@ class CallLetterNumber : Symbol {
             "7" -> 33
             "8" -> 34
             "9" -> 35
-            else -> throw IllegalArgumentException("CallLetterNumber, bad value: $n")
+            else -> throw IllegalArgumentException("CallLetterNumber, bad value: $encodedValue")
         }
     }
 
-    override fun encode(n: Int): ByteArray {
-        return when (n) {
+    override fun encode(numericValue: Int): ByteArray {
+        return when (numericValue) {
             0 -> "A".toByteArray()
             1 -> "B".toByteArray()
             2 -> "C".toByteArray()
@@ -89,7 +89,7 @@ class CallLetterNumber : Symbol {
             33 -> "7".toByteArray()
             34 -> "8".toByteArray()
             35 -> "9".toByteArray()
-            else -> throw IllegalArgumentException("Unknown value $n for CallLetterNumber")
+            else -> throw IllegalArgumentException("Unknown value $numericValue for CallLetterNumber")
         }
     }
 }

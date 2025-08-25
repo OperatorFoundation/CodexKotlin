@@ -1,15 +1,16 @@
-package org.operatorfoundation.codex.Symbols
+package org.operatorfoundation.codex.symbols
 
-class GridLetter {
-    val length: Int
-        get() = 18
+class GridLetter : Symbol {
+    override fun size(): Int {
+        return 18
+    }
 
     override fun toString(): String {
         return "GridLetter"
     }
 
-    fun decode(n: ByteArray): Int {
-        return when (n) {
+    override fun decode(encodedValue: ByteArray): Int {
+        return when (encodedValue.toString()) {
             "A" -> 0
             "B" -> 1
             "C" -> 2
@@ -21,31 +22,31 @@ class GridLetter {
             "I" -> 8
             "J" -> 9
             "K" -> 10
-            else -> throw IllegalArgumentException("GridLetter, bad value $n")
+            else -> throw IllegalArgumentException("GridLetter, bad value $encodedValue")
         }
     }
 
-    fun encode(n: Int): ByteArray {
-        return when (n) {
-            0 -> "A"
-            1 -> "B"
-            2 -> "C"
-            3 -> "D"
-            4 -> "E"
-            5 -> "F"
-            6 -> "G"
-            7 -> "H"
-            8 -> "I"
-            9 -> "J"
-            10 -> "K"
-            11 -> "L"
-            12 -> "M"
-            13 -> "N"
-            14 -> "O"
-            15 -> "P"
-            16 -> "Q"
-            17 -> "R"
-            else -> throw IllegalArgumentException("Unknown value $n for GridLetter")
+    override fun encode(numericValue: Int): ByteArray {
+        return when (numericValue) {
+            0 -> "A".toByteArray()
+            1 -> "B".toByteArray()
+            2 -> "C".toByteArray()
+            3 -> "D".toByteArray()
+            4 -> "E".toByteArray()
+            5 -> "F".toByteArray()
+            6 -> "G".toByteArray()
+            7 -> "H".toByteArray()
+            8 -> "I".toByteArray()
+            9 -> "J".toByteArray()
+            10 -> "K".toByteArray()
+            11 -> "L".toByteArray()
+            12 -> "M".toByteArray()
+            13 -> "N".toByteArray()
+            14 -> "O".toByteArray()
+            15 -> "P".toByteArray()
+            16 -> "Q".toByteArray()
+            17 -> "R".toByteArray()
+            else -> throw IllegalArgumentException("Unknown value $numericValue for GridLetter")
         }
     }
 }
