@@ -17,7 +17,7 @@ class Trinary : Symbol {
     override fun toString(): String = "Trinary"
 
     override fun decode(encodedValue: ByteArray): BigInteger {
-        return charToValue[encodedValue.toString()]
+        return charToValue[encodedValue.decodeToString()]
             ?: throw IllegalArgumentException("Trinary, bad value $encodedValue")
     }
 

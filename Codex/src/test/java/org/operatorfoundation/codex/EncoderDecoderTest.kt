@@ -2,6 +2,7 @@ package org.operatorfoundation.codex
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
+import org.operatorfoundation.codex.symbols.Binary
 import org.operatorfoundation.codex.symbols.Symbol
 import org.operatorfoundation.codex.symbols.Number
 import org.operatorfoundation.codex.symbols.Byte
@@ -10,6 +11,7 @@ import org.operatorfoundation.codex.symbols.CallLetterNumber
 import org.operatorfoundation.codex.symbols.CallLetterSpace
 import org.operatorfoundation.codex.symbols.GridLetter
 import org.operatorfoundation.codex.symbols.Power
+import org.operatorfoundation.codex.symbols.Trinary
 
 import java.math.BigInteger
 
@@ -94,6 +96,83 @@ class EncoderDecoderTest
         println("% bs: ${finalBytes.map { it[0].toInt() and 0xFF }}, str: $finalString")
 
         assertEquals("Test", finalString)
+    }
+
+    @Test
+    fun testBinaryTrinaryWithRequired()
+    {
+        // Test with Required('A'), Binary(), Trinary()
+        val encoder = Encoder(listOf(Required('A'.code.toByte()), Binary(), Trinary()))
+
+        val testCases = listOf(
+            0 to listOf("A", "0", "0"),
+            1 to listOf("A", "0", "1"),
+            2 to listOf("A", "0", "2"),
+            3 to listOf("A", "1", "0"),
+            4 to listOf("A", "1", "1"),
+            5 to listOf("A", "1", "2")
+        )
+
+        testCases.forEach { (input, expected) ->
+            val encoding = encoder.encode(BigInteger.valueOf(input.toLong()))
+            val actual = encoding.map { it.decodeToString() }
+
+            println("TEST RESULT input: $input, encoding: $actual")
+
+            assertEquals(expected, actual)
+        }
+    }
+
+    @Test
+    fun testBinaryTrinaryWithoutRequired()
+    {
+        // Test with just Binary(), Trinary()
+        val encoder = Encoder(listOf(Binary(), Trinary()))
+
+        val testCases = listOf(
+            0 to listOf("0", "0"),
+            1 to listOf("0", "1"),
+            2 to listOf("0", "2"),
+            3 to listOf("1", "0"),
+            4 to listOf("1", "1"),
+            5 to listOf("1", "2")
+        )
+
+        testCases.forEach { (input, expected) ->
+            val encoding = encoder.encode(BigInteger.valueOf(input.toLong()))
+            val actual = encoding.map { it.decodeToString() }
+
+            println("TEST RESULT input: $input, encoding: $actual")
+
+            assertEquals(expected, actual)
+        }
+    }
+
+    @Test
+    fun testRoundTrip()
+    {
+        // Test that encoding then decoding returns the original value
+        val symbols = listOf(
+            CallLetterNumber(),
+            Binary(),
+            Trinary(),
+            Number(),
+            CallLetterSpace()
+        )
+
+        val encoder = Encoder(symbols)
+        val decoder = encoder.decoder()
+
+        // Test various values
+        val testValues = listOf(0, 1, 42, 100, 500, 1000, 5000)
+
+        testValues.forEach { value ->
+            val bigIntValue = BigInteger.valueOf(value.toLong())
+            val encoded = encoder.encode(bigIntValue)
+            val decoded = decoder.decode(encoded)
+
+            assertEquals(bigIntValue, decoded, "Round-trip failed for value $value")
+        }
     }
 
 }
