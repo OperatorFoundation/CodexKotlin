@@ -1,5 +1,7 @@
 package org.operatorfoundation.codex.symbols
 
+import java.math.BigInteger
+
 class Binary : Symbol {
     override fun size(): Int = 2
 
@@ -7,7 +9,7 @@ class Binary : Symbol {
         return "Binary"
     }
 
-    override fun decode(encodedValue: ByteArray): Int {
+    override fun decode(encodedValue: ByteArray): BigInteger {
         return when (encodedValue.decodeToString()) {
             "0" -> 0
             "1" -> 1
@@ -15,7 +17,7 @@ class Binary : Symbol {
         }
     }
 
-    override fun encode(numericValue: Int): ByteArray {
+    override fun encode(numericValue: BigInteger): ByteArray {
         return when (numericValue) {
             0 -> "0".toByteArray()
             1 -> "1".toByteArray()
