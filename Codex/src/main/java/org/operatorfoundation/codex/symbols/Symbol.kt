@@ -21,7 +21,7 @@ interface Symbol
      * @param encodedValue Can be Char, String, or Int depending on the symbol
      * @return The decoded integer value
      */
-    fun decode(encodedValue: String): Int
+    fun decode(encodedValue: ByteArray): Int
 
     /**
      * Encodes a numeric value to its symbol representation.
@@ -30,5 +30,5 @@ interface Symbol
      * @param numericValue The integer to encode
      * @return Can be Char, String, or Int depending on the symbol
      */
-    fun encode(numericValue: Int): String
+    fun encode(numericValue: Int): ByteArray
 }

@@ -7,7 +7,7 @@ class Binary : Symbol {
         return "Binary"
     }
 
-    override fun decode(encodedValue: String): Int {
+    override fun decode(encodedValue: ByteArray): Int {
         return when (encodedValue) {
             "0" -> 0
             "1" -> 1
@@ -15,7 +15,7 @@ class Binary : Symbol {
         }
     }
 
-    override fun encode(numericValue: Int): String {
+    override fun encode(numericValue: Int): ByteArray {
         return when (numericValue) {
             0 -> "0"
             1 -> "1"
