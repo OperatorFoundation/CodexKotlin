@@ -1,7 +1,7 @@
 package org.operatorfoundation.codex
 
 import org.operatorfoundation.codex.symbols.Symbol
-import kotlin.math.min
+import java.math.BigInteger
 
 /**
  * Encoder class that converts an integer to a list of encoded values.
@@ -28,7 +28,7 @@ class Encoder(private val symbols: List<Symbol>)
      * @return List of ByteArrays, one for each symbol
      * @throws Exception if the value is too large to encode
      */
-    fun encode(integerToEncode: Int): List<ByteArray>
+    fun encode(integerToEncode: BigInteger): List<ByteArray>
     {
         val results = mutableListOf<ByteArray>()
         var remainingValue = integerToEncode
@@ -40,7 +40,7 @@ class Encoder(private val symbols: List<Symbol>)
             remainingValue = leftoverValue
         }
 
-        if (remainingValue != 0) {
+        if (remainingValue != 0.toBigInteger()) {
             throw Exception("Encoder error, results: ${results.map { it.decodeToString() }}, leftover: $remainingValue")
         }
 
@@ -55,7 +55,7 @@ class Encoder(private val symbols: List<Symbol>)
      * @param index The position of this symbol in the list
      * @return Pair of (encoded ByteArray for this symbol, remaining value)
      */
-    private fun encodeStep(currentValue: Int, symbol: Symbol, index: Int): Pair<ByteArray, Int>
+    private fun encodeStep(currentValue: BigInteger, symbol: Symbol, index: Int): Pair<ByteArray, BigInteger>
     {
         if (symbol.size() == 1)
         {
@@ -92,7 +92,7 @@ class Encoder(private val symbols: List<Symbol>)
             {
                 // Last symbol: encode all remaining value
                 val encodedBytes = symbol.encode(currentValue)
-                val result = Pair(encodedBytes, 0)
+                val result = Pair(encodedBytes, 0.toBigInteger())
                 println("result: (${encodedBytes.decodeToString()}, 0)")
 
                 return result
@@ -108,11 +108,11 @@ class Encoder(private val symbols: List<Symbol>)
 
                 // Determine value for this symbol position
                 // Division gives us how many "chunks" of remaining capacity we have
-                val symbolValue = min(currentValue / remainingCapacity, symbol.size() - 1)
+                val symbolValue = (currentValue / remainingCapacity.toBigInteger()).min(symbol.size().toBigInteger() - 1.toBigInteger())
                 println("n: $symbolValue")
 
                 // Modulo gives us what's left for the remaining symbols
-                val leftoverValue = currentValue % remainingCapacity
+                val leftoverValue = currentValue % remainingCapacity.toBigInteger()
                 println("m: $leftoverValue")
 
                 // Encode this symbol's portion

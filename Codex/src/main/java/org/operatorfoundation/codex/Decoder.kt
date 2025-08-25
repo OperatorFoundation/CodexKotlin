@@ -1,6 +1,7 @@
 package org.operatorfoundation.codex
 
 import org.operatorfoundation.codex.symbols.Symbol
+import java.math.BigInteger
 
 /**
  * Decoder class that converts a list of encoded values back to an integer.
@@ -27,9 +28,9 @@ class Decoder(private val symbols: List<Symbol>)
      * @param encodedValues List of ByteArrays, one for each symbol
      * @return The decoded integer value
      */
-    fun decode(encodedValues: List<ByteArray>): Int
+    fun decode(encodedValues: List<ByteArray>): BigInteger
     {
-        val results = mutableListOf<Int>()
+        val results = mutableListOf<BigInteger>()
 
         // Process each symbol with its corresponding encoded value
         symbols.forEachIndexed { index, symbol ->
@@ -38,7 +39,7 @@ class Decoder(private val symbols: List<Symbol>)
             results.add(result)
         }
 
-        return results.sum()
+        return results.reduce(BigInteger::add)
     }
 
     /**
@@ -49,14 +50,14 @@ class Decoder(private val symbols: List<Symbol>)
      * @param index The position of this symbol in the list
      * @return The numeric contribution of this symbol to the total
      */
-    private fun decodeStep(encodedValue: ByteArray, symbol: Symbol, index: Int): Int
+    private fun decodeStep(encodedValue: ByteArray, symbol: Symbol, index: Int): BigInteger
     {
         if (symbol.size() == 1)
         {
             // Symbols with size 1 don't contribute to the numeric value
             println("decode_step(${encodedValue.decodeToString()}, $symbol, $index)")
 
-            return 0
+            return 0.toBigInteger()
         }
         else
         {
@@ -77,7 +78,7 @@ class Decoder(private val symbols: List<Symbol>)
                 println("history: $remainingSymbolSizes, p: $positionMultiplier")
 
                 // Multiply decoded value by position weight
-                val result = symbol.decode(encodedValue) * positionMultiplier
+                val result = symbol.decode(encodedValue) * positionMultiplier.toBigInteger()
                 println("result: $result")
 
                 return result
