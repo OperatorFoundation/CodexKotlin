@@ -1,3 +1,4 @@
+<<<<<<< HEAD:Codex/src/main/java/org/operatorfoundation/codex/symbols/Byte.kt
 package org.operatorfoundation.codex.symbols
 
 
@@ -269,6 +270,9 @@ class Required(private val requiredChar: Char) : Symbol {
         return 0  // No numeric contribution
     }
 }
+=======
+import org.operatorfoundation.Codex.Symbols.Symbol
+>>>>>>> 2bc9abdeffd8d87b8e20f51ca11d5716a67dc80d:Codex/src/main/java/org/operatorfoundation/Codex/symbols/Byte.kt
 
 /**
  * Byte symbol - encodes/decodes byte values (0-255).
