@@ -28,7 +28,7 @@ class CallAny : Symbol {
     override fun toString(): String = "CallAny"
 
     override fun decode(encodedValue: ByteArray): BigInteger {
-        return charToValue[encodedValue.toString()]
+        return charToValue[encodedValue.decodeToString()]
             ?: throw IllegalArgumentException("CallAny, bad value: $encodedValue")
     }
 

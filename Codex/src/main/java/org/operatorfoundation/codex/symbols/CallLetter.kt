@@ -23,7 +23,7 @@ class CallLetter : Symbol {
     override fun toString(): String = "CallLetter"
 
     override fun decode(encodedValue: ByteArray): BigInteger {
-        return charToValue[encodedValue.toString()]
+        return charToValue[encodedValue.decodeToString()]
             ?: throw IllegalArgumentException("CallLetter, bad value: $encodedValue")
     }
 
