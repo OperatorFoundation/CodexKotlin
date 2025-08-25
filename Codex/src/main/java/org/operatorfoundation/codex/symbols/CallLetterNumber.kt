@@ -1,15 +1,16 @@
-package org.operatorfoundation.codex.Symbols
+package org.operatorfoundation.codex.symbols
 
-class CallLetterNumber {
-    val length: Int
-        get() = 26 + 10
+class CallLetterNumber : Symbol {
+    override fun size(): Int {
+        return 26 + 10
+    }
 
     override fun toString(): String {
         return "CallLetterNumber"
     }
 
-    fun decode(n: ByteArray): Int {
-        return when (n) {
+    override fun decode(n: ByteArray): Int {
+        return when (n.toString()) {
             "A" -> 0
             "B" -> 1
             "C" -> 2
@@ -50,44 +51,44 @@ class CallLetterNumber {
         }
     }
 
-    fun encode(n: Int): ByteArray {
+    override fun encode(n: Int): ByteArray {
         return when (n) {
-            0 -> "A"
-            1 -> "B"
-            2 -> "C"
-            3 -> "D"
-            4 -> "E"
-            5 -> "F"
-            6 -> "G"
-            7 -> "H"
-            8 -> "I"
-            9 -> "J"
-            10 -> "K"
-            11 -> "L"
-            12 -> "M"
-            13 -> "N"
-            14 -> "O"
-            15 -> "P"
-            16 -> "Q"
-            17 -> "R"
-            18 -> "S"
-            19 -> "T"
-            20 -> "U"
-            21 -> "V"
-            22 -> "W"
-            23 -> "X"
-            24 -> "Y"
-            25 -> "Z"
-            26 -> "0"
-            27 -> "1"
-            28 -> "2"
-            29 -> "3"
-            30 -> "4"
-            31 -> "5"
-            32 -> "6"
-            33 -> "7"
-            34 -> "8"
-            35 -> "9"
+            0 -> "A".toByteArray()
+            1 -> "B".toByteArray()
+            2 -> "C".toByteArray()
+            3 -> "D".toByteArray()
+            4 -> "E".toByteArray()
+            5 -> "F".toByteArray()
+            6 -> "G".toByteArray()
+            7 -> "H".toByteArray()
+            8 -> "I".toByteArray()
+            9 -> "J".toByteArray()
+            10 -> "K".toByteArray()
+            11 -> "L".toByteArray()
+            12 -> "M".toByteArray()
+            13 -> "N".toByteArray()
+            14 -> "O".toByteArray()
+            15 -> "P".toByteArray()
+            16 -> "Q".toByteArray()
+            17 -> "R".toByteArray()
+            18 -> "S".toByteArray()
+            19 -> "T".toByteArray()
+            20 -> "U".toByteArray()
+            21 -> "V".toByteArray()
+            22 -> "W".toByteArray()
+            23 -> "X".toByteArray()
+            24 -> "Y".toByteArray()
+            25 -> "Z".toByteArray()
+            26 -> "0".toByteArray()
+            27 -> "1".toByteArray()
+            28 -> "2".toByteArray()
+            29 -> "3".toByteArray()
+            30 -> "4".toByteArray()
+            31 -> "5".toByteArray()
+            32 -> "6".toByteArray()
+            33 -> "7".toByteArray()
+            34 -> "8".toByteArray()
+            35 -> "9".toByteArray()
             else -> throw IllegalArgumentException("Unknown value $n for CallLetterNumber")
         }
     }

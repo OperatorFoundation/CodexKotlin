@@ -8,7 +8,7 @@ class Binary : Symbol {
     }
 
     override fun decode(encodedValue: ByteArray): Int {
-        return when (encodedValue) {
+        return when (encodedValue.decodeToString()) {
             "0" -> 0
             "1" -> 1
             else -> throw IllegalArgumentException("Binary, bad value $encodedValue")
@@ -17,8 +17,8 @@ class Binary : Symbol {
 
     override fun encode(numericValue: Int): ByteArray {
         return when (numericValue) {
-            0 -> "0"
-            1 -> "1"
+            0 -> "0".toByteArray()
+            1 -> "1".toByteArray()
             else -> throw IllegalArgumentException("Unknown value $numericValue for Binary")
         }
     }
