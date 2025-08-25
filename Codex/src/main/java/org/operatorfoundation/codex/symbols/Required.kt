@@ -1,4 +1,5 @@
 package org.operatorfoundation.codex.symbols
+import java.math.BigInteger
 
 class Required(private val r: kotlin.Byte) : Symbol {
     override fun size(): Int {
@@ -9,20 +10,17 @@ class Required(private val r: kotlin.Byte) : Symbol {
         return "Required($r)"
     }
 
-    override fun encode(numericValue: Int): ByteArray {
+    override fun encode(numericValue: BigInteger): ByteArray {
         return byteArrayOf(r)
     }
 
-    override fun decode(encodedValue: ByteArray): Int {
+    override fun decode(encodedValue: ByteArray): BigInteger {
         if (encodedValue.size != 1) {
             throw IllegalArgumentException("Required($r) != $encodedValue")
         }
-
-        if (encodedValue[0] != r)
-        {
+        if (encodedValue[0] != r) {
             throw IllegalArgumentException("Required($r) != $encodedValue")
         }
-
-        return r.toInt()
+        return r.toInt().toBigInteger()
     }
 }

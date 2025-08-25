@@ -1,95 +1,38 @@
 package org.operatorfoundation.codex.symbols
+import java.math.BigInteger
 
 class CallLetterNumber : Symbol {
-    override fun size(): Int {
-        return 26 + 10
+    companion object {
+        private val charToValue = mapOf(
+            "A" to 0.toBigInteger(), "B" to 1.toBigInteger(), "C" to 2.toBigInteger(),
+            "D" to 3.toBigInteger(), "E" to 4.toBigInteger(), "F" to 5.toBigInteger(),
+            "G" to 6.toBigInteger(), "H" to 7.toBigInteger(), "I" to 8.toBigInteger(),
+            "J" to 9.toBigInteger(), "K" to 10.toBigInteger(), "L" to 11.toBigInteger(),
+            "M" to 12.toBigInteger(), "N" to 13.toBigInteger(), "O" to 14.toBigInteger(),
+            "P" to 15.toBigInteger(), "Q" to 16.toBigInteger(), "R" to 17.toBigInteger(),
+            "S" to 18.toBigInteger(), "T" to 19.toBigInteger(), "U" to 20.toBigInteger(),
+            "V" to 21.toBigInteger(), "W" to 22.toBigInteger(), "X" to 23.toBigInteger(),
+            "Y" to 24.toBigInteger(), "Z" to 25.toBigInteger(), "0" to 26.toBigInteger(),
+            "1" to 27.toBigInteger(), "2" to 28.toBigInteger(), "3" to 29.toBigInteger(),
+            "4" to 30.toBigInteger(), "5" to 31.toBigInteger(), "6" to 32.toBigInteger(),
+            "7" to 33.toBigInteger(), "8" to 34.toBigInteger(), "9" to 35.toBigInteger()
+        )
+
+        private val valueToChar = charToValue.map { (k, v) -> v to k }.toMap()
     }
 
-    override fun toString(): String {
-        return "CallLetterNumber"
+    override fun size(): Int = 26 + 10
+
+    override fun toString(): String = "CallLetterNumber"
+
+    override fun decode(encodedValue: ByteArray): BigInteger {
+        return charToValue[encodedValue.toString()]
+            ?: throw IllegalArgumentException("CallLetterNumber, bad value: $encodedValue")
     }
 
-    override fun decode(encodedValue: ByteArray): Int {
-        return when (encodedValue.toString()) {
-            "A" -> 0
-            "B" -> 1
-            "C" -> 2
-            "D" -> 3
-            "E" -> 4
-            "F" -> 5
-            "G" -> 6
-            "H" -> 7
-            "I" -> 8
-            "J" -> 9
-            "K" -> 10
-            "L" -> 11
-            "M" -> 12
-            "N" -> 13
-            "O" -> 14
-            "P" -> 15
-            "Q" -> 16
-            "R" -> 17
-            "S" -> 18
-            "T" -> 19
-            "U" -> 20
-            "V" -> 21
-            "W" -> 22
-            "X" -> 23
-            "Y" -> 24
-            "Z" -> 25
-            "0" -> 26
-            "1" -> 27
-            "2" -> 28
-            "3" -> 29
-            "4" -> 30
-            "5" -> 31
-            "6" -> 32
-            "7" -> 33
-            "8" -> 34
-            "9" -> 35
-            else -> throw IllegalArgumentException("CallLetterNumber, bad value: $encodedValue")
-        }
-    }
-
-    override fun encode(numericValue: Int): ByteArray {
-        return when (numericValue) {
-            0 -> "A".toByteArray()
-            1 -> "B".toByteArray()
-            2 -> "C".toByteArray()
-            3 -> "D".toByteArray()
-            4 -> "E".toByteArray()
-            5 -> "F".toByteArray()
-            6 -> "G".toByteArray()
-            7 -> "H".toByteArray()
-            8 -> "I".toByteArray()
-            9 -> "J".toByteArray()
-            10 -> "K".toByteArray()
-            11 -> "L".toByteArray()
-            12 -> "M".toByteArray()
-            13 -> "N".toByteArray()
-            14 -> "O".toByteArray()
-            15 -> "P".toByteArray()
-            16 -> "Q".toByteArray()
-            17 -> "R".toByteArray()
-            18 -> "S".toByteArray()
-            19 -> "T".toByteArray()
-            20 -> "U".toByteArray()
-            21 -> "V".toByteArray()
-            22 -> "W".toByteArray()
-            23 -> "X".toByteArray()
-            24 -> "Y".toByteArray()
-            25 -> "Z".toByteArray()
-            26 -> "0".toByteArray()
-            27 -> "1".toByteArray()
-            28 -> "2".toByteArray()
-            29 -> "3".toByteArray()
-            30 -> "4".toByteArray()
-            31 -> "5".toByteArray()
-            32 -> "6".toByteArray()
-            33 -> "7".toByteArray()
-            34 -> "8".toByteArray()
-            35 -> "9".toByteArray()
-            else -> throw IllegalArgumentException("Unknown value $numericValue for CallLetterNumber")
-        }
+    override fun encode(numericValue: BigInteger): ByteArray {
+        return (valueToChar[numericValue]
+            ?: throw IllegalArgumentException("Unknown value $numericValue for CallLetterNumber"))
+            .toByteArray()
     }
 }
