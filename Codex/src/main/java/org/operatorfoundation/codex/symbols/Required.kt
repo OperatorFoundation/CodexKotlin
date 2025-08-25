@@ -1,4 +1,4 @@
-package org.operatorfoundation.Codex.Symbols
+package org.operatorfoundation.codex.Symbols
 
 class Required(private val r: Any) {
     val length: Int

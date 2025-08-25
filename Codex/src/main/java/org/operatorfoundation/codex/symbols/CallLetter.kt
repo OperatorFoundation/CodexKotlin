@@ -1,11 +1,11 @@
-package org.operatorfoundation.Codex.Symbols
+package org.operatorfoundation.codex.Symbols
 
-class GridLetter {
+class CallLetter {
     val length: Int
-        get() = 18
+        get() = 26
 
     override fun toString(): String {
-        return "GridLetter"
+        return "CallLetter"
     }
 
     fun decode(n: String): Int {
@@ -21,7 +21,22 @@ class GridLetter {
             "I" -> 8
             "J" -> 9
             "K" -> 10
-            else -> throw IllegalArgumentException("GridLetter, bad value $n")
+            "L" -> 11
+            "M" -> 12
+            "N" -> 13
+            "O" -> 14
+            "P" -> 15
+            "Q" -> 16
+            "R" -> 17
+            "S" -> 18
+            "T" -> 19
+            "U" -> 20
+            "V" -> 21
+            "W" -> 22
+            "X" -> 23
+            "Y" -> 24
+            "Z" -> 25
+            else -> throw IllegalArgumentException("CallLetter, bad value: $n")
         }
     }
 
@@ -45,7 +60,15 @@ class GridLetter {
             15 -> "P"
             16 -> "Q"
             17 -> "R"
-            else -> throw IllegalArgumentException("Unknown value $n for GridLetter")
+            18 -> "S"
+            19 -> "T"
+            20 -> "U"
+            21 -> "V"
+            22 -> "W"
+            23 -> "X"
+            24 -> "Y"
+            25 -> "Z"
+            else -> throw IllegalArgumentException("Unknown value $n for CallLetter")
         }
     }
 }

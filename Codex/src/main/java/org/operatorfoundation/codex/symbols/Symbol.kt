@@ -1,4 +1,4 @@
-package org.operatorfoundation.Codex.Symbols
+package org.operatorfoundation.codex.symbols
 
 /**
  * Base interface for all symbol types that can encode/decode values.
@@ -21,7 +21,7 @@ interface Symbol
      * @param encodedValue Can be Char, String, or Int depending on the symbol
      * @return The decoded integer value
      */
-    fun decode(encodedValue: Any): Int
+    fun decode(encodedValue: String): Int
 
     /**
      * Encodes a numeric value to its symbol representation.
@@ -30,5 +30,5 @@ interface Symbol
      * @param numericValue The integer to encode
      * @return Can be Char, String, or Int depending on the symbol
      */
-    fun encode(numericValue: Int): Any
+    fun encode(numericValue: Int): String
 }

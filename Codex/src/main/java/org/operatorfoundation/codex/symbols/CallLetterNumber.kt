@@ -1,11 +1,11 @@
-package org.operatorfoundation.Codex.Symbols
+package org.operatorfoundation.codex.Symbols
 
-class CallLetter {
+class CallLetterNumber {
     val length: Int
-        get() = 26
+        get() = 26 + 10
 
     override fun toString(): String {
-        return "CallLetter"
+        return "CallLetterNumber"
     }
 
     fun decode(n: String): Int {
@@ -36,7 +36,17 @@ class CallLetter {
             "X" -> 23
             "Y" -> 24
             "Z" -> 25
-            else -> throw IllegalArgumentException("CallLetter, bad value: $n")
+            "0" -> 26
+            "1" -> 27
+            "2" -> 28
+            "3" -> 29
+            "4" -> 30
+            "5" -> 31
+            "6" -> 32
+            "7" -> 33
+            "8" -> 34
+            "9" -> 35
+            else -> throw IllegalArgumentException("CallLetterNumber, bad value: $n")
         }
     }
 
@@ -68,7 +78,17 @@ class CallLetter {
             23 -> "X"
             24 -> "Y"
             25 -> "Z"
-            else -> throw IllegalArgumentException("Unknown value $n for CallLetter")
+            26 -> "0"
+            27 -> "1"
+            28 -> "2"
+            29 -> "3"
+            30 -> "4"
+            31 -> "5"
+            32 -> "6"
+            33 -> "7"
+            34 -> "8"
+            35 -> "9"
+            else -> throw IllegalArgumentException("Unknown value $n for CallLetterNumber")
         }
     }
 }

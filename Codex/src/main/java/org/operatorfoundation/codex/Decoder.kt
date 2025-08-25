@@ -1,4 +1,4 @@
-package org.operatorfoundation.Codex
+package org.operatorfoundation.codex
 
 class Decoder {
 }

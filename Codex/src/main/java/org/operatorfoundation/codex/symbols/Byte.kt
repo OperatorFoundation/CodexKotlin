@@ -1,4 +1,4 @@
-package org.operatorfoundation.Codex.Symbols
+package org.operatorfoundation.codex.Symbols
 
 class Byte {
     val length: Int

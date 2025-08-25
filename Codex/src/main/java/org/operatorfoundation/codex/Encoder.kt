@@ -1,6 +1,6 @@
-package org.operatorfoundation.Codex
+package org.operatorfoundation.codex
 
-import org.operatorfoundation.Codex.Symbols.Symbol
+import org.operatorfoundation.codex.Symbols.Symbol
 
 /**
  * Encoder class that processes a list of symbols to encode values
