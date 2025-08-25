@@ -1,73 +1,51 @@
-package org.operatorfoundation.Codex.Symbols//class GridLetter:
-//    def __len__(self):
-//return 18
-//
-//def __str__(self):
-//return 'GridLetter'
-//
-//def decode(self, n):
-//if n == 'A':
-//return 0
-//elif n == 'B':
-//return 1
-//elif n == 'C':
-//return 2
-//elif n == 'D':
-//return 3
-//elif n == 'E':
-//return 4
-//elif n == 'F':
-//return 5
-//elif n == 'G':
-//return 6
-//elif n == 'H':
-//return 7
-//elif n == 'I':
-//return 8
-//elif n == 'J':
-//return 9
-//elif n == 'K':
-//return 10
-//else:
-//raise ValueError('GridLetter, bad value {n}'.format(n=n))
-//
-//def encode(self, n):
-//if n == 0:
-//return 'A'
-//elif n == 1:
-//return 'B'
-//elif n == 2:
-//return 'C'
-//elif n == 3:
-//return 'D'
-//elif n == 4:
-//return 'E'
-//elif n == 5:
-//return 'F'
-//elif n == 6:
-//return 'G'
-//elif n == 7:
-//return 'H'
-//elif n == 8:
-//return 'I'
-//elif n == 9:
-//return 'J'
-//elif n == 10:
-//return 'K'
-//elif n == 11:
-//return 'L'
-//elif n == 12:
-//return 'M'
-//elif n == 13:
-//return 'N'
-//elif n == 14:
-//return 'O'
-//elif n == 15:
-//return 'P'
-//elif n == 16:
-//return 'Q'
-//elif n == 17:
-//return 'R'
-//
-//else:
-//raise Exception('Unknown value {n} for CallLetter'.format(n=n)
+package org.operatorfoundation.Codex.Symbols
+
+class GridLetter {
+    val length: Int
+        get() = 18
+
+    override fun toString(): String {
+        return "GridLetter"
+    }
+
+    fun decode(n: String): Int {
+        return when (n) {
+            "A" -> 0
+            "B" -> 1
+            "C" -> 2
+            "D" -> 3
+            "E" -> 4
+            "F" -> 5
+            "G" -> 6
+            "H" -> 7
+            "I" -> 8
+            "J" -> 9
+            "K" -> 10
+            else -> throw IllegalArgumentException("GridLetter, bad value $n")
+        }
+    }
+
+    fun encode(n: Int): String {
+        return when (n) {
+            0 -> "A"
+            1 -> "B"
+            2 -> "C"
+            3 -> "D"
+            4 -> "E"
+            5 -> "F"
+            6 -> "G"
+            7 -> "H"
+            8 -> "I"
+            9 -> "J"
+            10 -> "K"
+            11 -> "L"
+            12 -> "M"
+            13 -> "N"
+            14 -> "O"
+            15 -> "P"
+            16 -> "Q"
+            17 -> "R"
+            else -> throw IllegalArgumentException("Unknown value $n for GridLetter")
+        }
+    }
+}
