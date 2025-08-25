@@ -1,7 +1,5 @@
 package org.operatorfoundation.codex
 
-import org.operatorfoundation.codex.symbols.Power
-import org.operatorfoundation.codex.symbols.Binary
 import org.operatorfoundation.codex.symbols.Symbol
 
 /**
@@ -15,7 +13,6 @@ import org.operatorfoundation.codex.symbols.Symbol
  */
 class Decoder(private val symbols: List<Symbol>)
 {
-
     /**
      * Creates an Encoder instance with the same symbol list.
      */
@@ -53,10 +50,11 @@ class Decoder(private val symbols: List<Symbol>)
      */
     private fun decodeStep(encodedValue: ByteArray, symbol: Symbol, index: Int): Int
     {
-        return if (symbol.size() == 1) {
+        if (symbol.size() == 1) {
             // Symbols with size 1 don't contribute to the numeric value
             println("decode_step(${encodedValue.decodeToString()}, $symbol, $index)")
-            0
+
+            return 0
         }
         else
         {
@@ -65,7 +63,7 @@ class Decoder(private val symbols: List<Symbol>)
             if (index == symbols.size - 1)
             {
                 // Last symbol: just return its decoded value
-                symbol.decode(encodedValue)
+                return symbol.decode(encodedValue)
             }
             else
             {
@@ -80,7 +78,7 @@ class Decoder(private val symbols: List<Symbol>)
                 val result = symbol.decode(encodedValue) * p
                 println("result: $result")
 
-                result
+                return result
             }
         }
     }
