@@ -1,4 +1,4 @@
-//class CallAny:
+package org.operatorfoundation.Codex.Symbols//class CallAny:
 //    def __len__(self):
 //return 26 + 10 + 1
 //

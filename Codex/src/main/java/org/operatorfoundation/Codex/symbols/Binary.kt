@@ -1,3 +1,4 @@
+package org.operatorfoundation.Codex.Symbols
 //class Binary:
 //    def __len__(self):
 //return 2

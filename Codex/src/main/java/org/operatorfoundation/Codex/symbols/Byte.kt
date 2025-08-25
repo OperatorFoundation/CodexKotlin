@@ -1,4 +1,4 @@
-//class Byte:
+package org.operatorfoundation.Codex.Symbols//class Byte:
 //    def __len__(self):
 //return 256
 //

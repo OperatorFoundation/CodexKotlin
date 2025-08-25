@@ -1,4 +1,4 @@
-//class Required:
+package org.operatorfoundation.Codex.Symbols//class Required:
 //    def __init__(self, r):
 //self.r = r
 //

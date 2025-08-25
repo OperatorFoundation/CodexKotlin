@@ -1,4 +1,4 @@
-//class Power:
+package org.operatorfoundation.Codex.Symbols//class Power:
 //    def __len__(self):
 //return 19
 //

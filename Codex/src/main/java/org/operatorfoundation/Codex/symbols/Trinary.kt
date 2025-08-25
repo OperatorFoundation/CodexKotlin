@@ -1,4 +1,4 @@
-//class Trinary:
+package org.operatorfoundation.Codex.Symbols//class Trinary:
 //    def __len__(self):
 //return 3
 //

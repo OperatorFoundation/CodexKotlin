@@ -1,4 +1,4 @@
-//class Number:
+package org.operatorfoundation.Codex.Symbols//class Number:
 //    def __len__(self):
 //return 10
 //

@@ -1,4 +1,4 @@
-//class CallLetterSpace:
+package org.operatorfoundation.Codex.Symbols//class CallLetterSpace:
 //    def __len__(self):
 //return 27
 //

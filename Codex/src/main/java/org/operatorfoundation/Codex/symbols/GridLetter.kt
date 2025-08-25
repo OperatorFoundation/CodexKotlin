@@ -1,4 +1,4 @@
-//class GridLetter:
+package org.operatorfoundation.Codex.Symbols//class GridLetter:
 //    def __len__(self):
 //return 18
 //

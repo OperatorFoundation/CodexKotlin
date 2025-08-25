@@ -1,4 +1,4 @@
-//class CallLetterNumber:
+package org.operatorfoundation.Codex.Symbols//class CallLetterNumber:
 //    def __len__(self):
 //return 26 + 10
 //
