@@ -6,7 +6,7 @@ import java.math.BigInteger
  * Base interface for all symbol types that can encode/decode values.
  * Symbols represent different character sets or value ranges (e.g., letters, numbers, bytes).
  * Each symbol knows its size (number of possible values) and how to convert between
- * integer representations and actual values (characters, strings, or integers).
+ * numeric representations and byte arrays.
  */
 interface Symbol
 {
@@ -17,20 +17,20 @@ interface Symbol
     fun size(): Int
 
     /**
-     * Decodes an input value (Char, String, or Int) to its numeric representation.
-     * For example, CallLetterNumber decodes 'A' to 0, 'B' to 1, etc.
+     * Decodes a ByteArray to its numeric representation.
+     * For example, CallLetterNumber decodes "A".toByteArray() to 0, "B".toByteArray() to 1, etc.
      *
-     * @param encodedValue Can be Char, String, or Int depending on the symbol
-     * @return The decoded integer value
+     * @param encodedValue ByteArray containing the encoded data
+     * @return The decoded numeric value as BigInteger
      */
     fun decode(encodedValue: ByteArray): BigInteger
 
     /**
-     * Encodes a numeric value to its symbol representation.
-     * For example, CallLetterNumber encodes 0 to 'A', 1 to 'B', etc.
+     * Encodes a numeric value to its byte array representation.
+     * For example, CallLetterNumber encodes 0 to "A".toByteArray(), 1 to "B".toByteArray(), etc.
      *
-     * @param numericValue The integer to encode
-     * @return Can be Char, String, or Int depending on the symbol
+     * @param numericValue The numeric value to encode as BigInteger
+     * @return ByteArray containing the encoded data
      */
     fun encode(numericValue: BigInteger): ByteArray
 }
