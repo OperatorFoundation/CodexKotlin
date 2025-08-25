@@ -27,7 +27,8 @@ class Decoder(private val symbols: List<Symbol>)
      * @param encodedValues List of ByteArrays, one for each symbol
      * @return The decoded integer value
      */
-    fun decode(encodedValues: List<ByteArray>): Int {
+    fun decode(encodedValues: List<ByteArray>): Int
+    {
         val results = mutableListOf<Int>()
 
         // Process each symbol with its corresponding encoded value
@@ -50,7 +51,8 @@ class Decoder(private val symbols: List<Symbol>)
      */
     private fun decodeStep(encodedValue: ByteArray, symbol: Symbol, index: Int): Int
     {
-        if (symbol.size() == 1) {
+        if (symbol.size() == 1)
+        {
             // Symbols with size 1 don't contribute to the numeric value
             println("decode_step(${encodedValue.decodeToString()}, $symbol, $index)")
 
@@ -68,14 +70,14 @@ class Decoder(private val symbols: List<Symbol>)
             else
             {
                 // Calculate product of remaining symbol sizes
-                val history = symbols.subList(index + 1, symbols.size)
-                val lens = history.map { it.size() }
-                val p = lens.fold(1) { acc, size -> acc * size }
+                val remainingSymbols = symbols.subList(index + 1, symbols.size)
+                val remainingSymbolSizes = remainingSymbols.map { it.size() }
+                val positionMultiplier = remainingSymbolSizes.fold(1) { acc, size -> acc * size }
 
-                println("history: $lens, p: $p")
+                println("history: $remainingSymbolSizes, p: $positionMultiplier")
 
                 // Multiply decoded value by position weight
-                val result = symbol.decode(encodedValue) * p
+                val result = symbol.decode(encodedValue) * positionMultiplier
                 println("result: $result")
 
                 return result
