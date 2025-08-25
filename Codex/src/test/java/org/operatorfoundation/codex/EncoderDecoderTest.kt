@@ -77,7 +77,7 @@ class EncoderDecoderTest
         val grid = wsprEncoding.subList(6, 10).joinToString("") { it.decodeToString() }
         val power = wsprEncoding[10].decodeToString()
 
-        println("$callsign $grid $power")
+        println("WSPR Message: $callsign $grid $power")
 
         // Verify decoding back to same integer
         val wsprDecoder = wsprEncoder.decoder()

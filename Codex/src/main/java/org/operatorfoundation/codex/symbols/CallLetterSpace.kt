@@ -23,7 +23,7 @@ class CallLetterSpace : Symbol {
     override fun toString(): String = "CallLetterSpace"
 
     override fun decode(encodedValue: ByteArray): BigInteger {
-        return charToValue[encodedValue.toString()]
+        return charToValue[encodedValue.decodeToString()]
             ?: throw IllegalArgumentException("CallLetterSpace, bad value: $encodedValue")
     }
 

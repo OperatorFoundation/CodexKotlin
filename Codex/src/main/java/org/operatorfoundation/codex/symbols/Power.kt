@@ -21,7 +21,7 @@ class Power : Symbol {
     override fun toString(): String = "Power"
 
     override fun decode(encodedValue: ByteArray): BigInteger {
-        return charToValue[encodedValue.toString()]
+        return charToValue[encodedValue.decodeToString()]
             ?: throw IllegalArgumentException("Power, bad value $encodedValue")
     }
 

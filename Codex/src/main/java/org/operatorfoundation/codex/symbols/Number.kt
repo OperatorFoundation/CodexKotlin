@@ -18,7 +18,7 @@ class Number : Symbol {
     override fun toString(): String = "Number"
 
     override fun decode(encodedValue: ByteArray): BigInteger {
-        return charToValue[encodedValue.toString()]
+        return charToValue[encodedValue.decodeToString()]
             ?: throw IllegalArgumentException("Number, bad value: $encodedValue")
     }
 

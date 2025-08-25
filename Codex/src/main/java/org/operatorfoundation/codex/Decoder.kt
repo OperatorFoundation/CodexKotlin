@@ -55,13 +55,13 @@ class Decoder(private val symbols: List<Symbol>)
         if (symbol.size() == 1)
         {
             // Symbols with size 1 don't contribute to the numeric value
-            println("decode_step(${encodedValue.decodeToString()}, $symbol, $index)")
+            println("decode_step(encoded value: ${encodedValue.decodeToString()}, symbol: $symbol, index: $index)")
 
             return 0.toBigInteger()
         }
         else
         {
-            println("decode_step(${encodedValue.decodeToString()}, $symbol, $index)")
+            println("decode_step(encoded value: ${encodedValue.decodeToString()}, symbol: $symbol, index: $index)")
 
             if (index == symbols.size - 1)
             {
@@ -75,7 +75,7 @@ class Decoder(private val symbols: List<Symbol>)
                 val remainingSymbolSizes = remainingSymbols.map { it.size() }
                 val positionMultiplier = remainingSymbolSizes.fold(1) { acc, size -> acc * size }
 
-                println("history: $remainingSymbolSizes, p: $positionMultiplier")
+                println("history:/n  remaining symbol sizes - $remainingSymbolSizes, position multiplier: $positionMultiplier")
 
                 // Multiply decoded value by position weight
                 val result = symbol.decode(encodedValue) * positionMultiplier.toBigInteger()
