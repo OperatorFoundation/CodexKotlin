@@ -96,14 +96,162 @@ class WSPRCodex
     private val encoder = Encoder(WSPR_SYMBOLS)
     private val decoder = Decoder(WSPR_SYMBOLS)
 
+    /**
+     * Encodes a byte array as a WSPR message.
+     *
+     * The data is converted to a large integer and distributed across the WSPR
+     * message fields according to the symbol configuration. The encoding is
+     * deterministic and reversible.
+     *
+     * @param data Binary data to encode (e.g., encrypted message bytes)
+     * @return WSPRDataMessage containing callsign, grid square, and power level
+     * @throws WSPRCodexException if data exceeds maximum capacity
+     */
     fun encode(data: ByteArray): WSPRDataMessage
     {
-        // TODO: Not implemented
+        // Validate payload size
+        if (data.size > getMaxPayloadBytes())
+        {
+            throw WSPRCodexException(
+                "Data size ${data.size} bytes exceeds maximum capacity of ${getMaxPayloadBytes()} bytes. " +
+                        "Consider splitting into multiple messages or reducing payload size."
+            )
+        }
+
+        // Convert byte array to BigInt for encoding
+        // Uses big-endian byte order
+        val dataAsInteger = BigInteger(1, data) // 1 = positive
+
+        // Encode integer across WSPR symbols
+        val encodedSymbols = encoder.encode(dataAsInteger)
+
+        // Parse encoded symbols into WSPR message fields
+        return parseEncodedSymbolsToMessage(encodedSymbols)
     }
 
+
+    /**
+     * Decodes a WSPR message back to the original byte array.
+     *
+     * Reverses the encoding process by converting the WSPR message fields
+     * back to symbol representations, then decoding to the original integer
+     * and finally to the byte array.
+     *
+     * @param message WSPR message to decode
+     * @return Original byte array that was encoded
+     * @throws WSPRCodexException if message format is invalid
+     */
     fun decode(message: WSPRDataMessage): ByteArray
     {
-        // TODO: Not implemented
+        // Convert message fields back to encoded symbol format
+        val encodedSymbols = convertMessageToEncodedSymbols(message)
+
+        // Decode symbols back to int
+        val decodedInteger = decoder.decode(encodedSymbols)
+
+        // Convert integer back to byte array
+        return decodedInteger.toByteArray().let { bytes ->
+            // BigInteger.toByteArray() may include leading zero byte for sign
+            // Remove it if present to get original data
+            if (bytes.isNotEmpty() && bytes[0] == 0.toByte())
+            {
+                bytes.copyOfRange(1, bytes.size)
+            }
+            else
+            {
+                bytes
+            }
+        }
+    }
+
+    // ========== Private Helper Methods ==========
+
+    /**
+     * Parses encoded symbols into a structured WSPR message.
+     *
+     * Symbol mapping:
+     * - encodedSymbols[0]: Required 'Q' (ignored)
+     * - encodedSymbols[1-6]: Callsign (6 characters)
+     * - encodedSymbols[7-10]: Grid square (4 characters)
+     * - encodedSymbols[11]: Power level (2-character representation)
+     *
+     * @param encodedSymbols List of ByteArrays from encoder
+     * @return Structured WSPR message
+     */
+    private fun parseEncodedSymbolsToMessage(encodedSymbols: List<ByteArray>): WSPRDataMessage
+    {
+        require(encodedSymbols.size == WSPR_SYMBOLS.size)
+        {
+            "Invalid encoded symbol count: ${encodedSymbols.size}, expected: ${WSPR_SYMBOLS.size}"
+        }
+
+        // Extract callsign (symbols 1-6)
+        val callsign = buildString {
+            for (i in 1..6)
+            {
+                append(encodedSymbols[i].decodeToString())
+            }
+        }
+
+        // Extract grid square (symbols 7 - 10)
+        val gridSquare = buildString {
+            for (i in 7..10)
+            {
+                append(encodedSymbols[i].decodeToString())
+            }
+        }
+
+        // Extract power level (Symbol 11)
+        val powerDbm = encodedSymbols[11].decodeToString().toInt()
+
+        return WSPRDataMessage(
+            callsign,
+            gridSquare,
+            powerDbm
+        )
+    }
+
+    /**
+     * Converts a WSPR message back to encoded symbol format for decoding.
+     *
+     * This reverses the parseEncodedSymbolsToMessage operation, reconstructing
+     * the ByteArray list that the encoder originally produced.
+     *
+     * @param message WSPR message to convert
+     * @return List of ByteArrays suitable for decoder
+     */
+    private fun convertMessageToEncodedSymbols(message: WSPRDataMessage): List<ByteArray>
+    {
+        val symbols = mutableListOf<ByteArray>()
+
+        // Add the required prefix
+        symbols.add("Q".toByteArray())
+
+        // Add callsign characters (exactly 6 characters)
+        val paddedCallsign = message.callsign.padEnd(6, ' ')
+        require(paddedCallsign.length == 6)
+        {
+            "Callsign must be 6 characters or less: ${message.callsign}"
+        }
+
+        paddedCallsign.forEach { char ->
+            symbols.add(char.toString().toByteArray())
+        }
+
+        // Add grid square characters (exactly 4 characters)
+        require(message.gridSquare.length == 4)
+        {
+            "Grid square must be exactly 4 characters: ${message.gridSquare}"
+        }
+
+        message.gridSquare.forEach { char ->
+            symbols.add(char.toString().toByteArray())
+        }
+
+        // Add power level
+        symbols.add(message.powerDbm.toString().toByteArray())
+
+        return symbols
     }
 }
 
@@ -144,3 +292,14 @@ data class WSPRDataMessage(
                 powerDbm in 0..60
     }
 }
+
+/**
+ * Exception thrown by WSPRCodex for encoding/decoding errors.
+ *
+ * @property message Descriptive error message
+ * @property cause Optional underlying cause of the error
+ */
+class WSPRCodexException(
+    message: String,
+    cause: Throwable? = null
+) : Exception(message, cause)
