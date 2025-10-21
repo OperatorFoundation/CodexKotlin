@@ -1,7 +1,5 @@
-package org.operatorfoundation.Codex
+package org.operatorfoundation.codex
 
-import org.operatorfoundation.codex.Decoder
-import org.operatorfoundation.codex.Encoder
 import org.operatorfoundation.codex.symbols.Number
 import org.operatorfoundation.codex.symbols.*
 import java.math.BigInteger
@@ -72,15 +70,38 @@ class WSPRCodex
          */
         fun getMaxPayloadBytes(): Int
         {
-            // Calculate total capacity in bits
+            // DEBUG: Print out what symbols we have and their sizes
+            println("=== Symbol Configuration Debug ===")
+            WSPR_SYMBOLS.forEachIndexed { index, symbol ->
+                println("Symbol $index: $symbol, size: ${symbol.size()}")
+            }
+
+            // Calculate the product of all symbol sizes
+            // e.g. if we have symbols with sizes [36, 36, 18, 10, 19]
+            // total capacity = 36 x 36 x 18 x 10 x 19 (total number of unique calculations)
+
+            // Convert list of symbols to list of their sizes
             val symbolSizes = WSPR_SYMBOLS.map { it.size().toBigInteger() }
-            val totalCapacity = symbolSizes.fold(BigInteger.ONE) { acc, size -> acc * size }
+            // Multiply all  sizes together
+            val totalCapacity = symbolSizes.fold(BigInteger.ONE) { acc, size -> acc * size}
 
-            // Convert to bits (log2 of total capacity)
-            val capacityBits = totalCapacity.bitLength() - 1
+            // The max integer we can encode is (totalCapacity - 1)
+            val maxEncodableValue = totalCapacity - BigInteger.ONE
 
-            // Convert to bytes (divide by 8)
-            return capacityBits / 8
+            // Convert maxEncodableValue to bytes so we know how many bytes we need (how many bytes  it takes to store this number)
+            val byteArray = maxEncodableValue.toByteArray()
+
+            // BigInteger sometimes adds an extra leading zero byte for the sign
+            // Remove the extra byte if it exists
+            return if (byteArray.isNotEmpty() && byteArray[0] == 0.toByte())
+            {
+                byteArray.size - 1
+            }
+            else
+            {
+                byteArray.size
+            }
+
         }
 
         /**
