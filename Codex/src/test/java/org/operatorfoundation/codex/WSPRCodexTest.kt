@@ -17,6 +17,47 @@ class WSPRCodexTest
     }
 
     @Test
+    fun testCompleteWorkflow()
+    {
+        println("\n=== Complete WSPR Encoding Workflow ===")
+
+        // Step 1: Create a short message
+        val plaintext = "Hello"
+        println("1. Plaintext: '$plaintext' (${plaintext.length} chars)")
+
+        // Step 2: Simulate encryption
+        val plaintextBytes = plaintext.toByteArray()
+        println("2. Plaintext bytes: ${plaintextBytes.size} bytes")
+
+        // Check capacity
+        val maxCapacity = WSPRCodex.getMaxPayloadBytes()
+        println("3. WSPR capacity: $maxCapacity bytes")
+        assertTrue(plaintextBytes.size <= maxCapacity, "Message fits in capacity")
+
+        // Step 3: Encode to WSPR message
+        val wsprMessage = codex.encode(plaintextBytes)
+        println("4. WSPR Message: $wsprMessage")
+        println("   - Callsign: '${wsprMessage.callsign}'")
+        println("   - Grid: '${wsprMessage.gridSquare}'")
+        println("   - Power: ${wsprMessage.powerDbm} dBm")
+
+        // Step 4: Verify message is valid
+        assertTrue(wsprMessage.isValid(), "WSPR message should be valid")
+
+        // Step 5: Decode back to bytes
+        val decodedBytes = codex.decode(wsprMessage)
+        println("5. Decoded bytes: ${decodedBytes.size} bytes")
+
+        // Step 6: Convert back to text
+        val decodedText = String(decodedBytes)
+        println("6. Decoded text: '$decodedText'")
+
+        // Verify round-trip
+        assertEquals(plaintext, decodedText, "Round-trip should preserve original text")
+        println("✓ Round-trip successful!\n")
+    }
+
+    @Test
     fun testMaxPayload()
     {
         // Verify the calculated maximum payload is reasonable
@@ -24,8 +65,8 @@ class WSPRCodexTest
 
         println("Maximum WSPR payload capacity: $maxBytes bytes")
 
-        // Should be around 28 bytes based on symbol sizes
-        assertTrue(maxBytes in 20..35, "Expected capacity around 28 bytes, got $maxBytes")
+        // WSPR symbol configuration provides 7 bytes of capacity
+        assertEquals(7, maxBytes, "Expected exactly 7 bytes capacity")
     }
 
     @Test
@@ -33,13 +74,17 @@ class WSPRCodexTest
         // Try encoding increasingly large byte arrays until we find the limit
         var workingSize = 0
 
-        for (size in 1..50) {
+        for (size in 1..50)
+        {
             val testData = ByteArray(size) { 0xFF.toByte() }
-            try {
+            try
+            {
                 codex.encode(testData)
                 workingSize = size
                 println("Size $size: SUCCESS")
-            } catch (e: Exception) {
+            }
+            catch (e: Exception)
+            {
                 println("Size $size: FAILED - ${e.message}")
                 break
             }

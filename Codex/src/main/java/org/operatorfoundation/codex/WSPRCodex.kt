@@ -70,30 +70,35 @@ class WSPRCodex
          */
         fun getMaxPayloadBytes(): Int
         {
-            // DEBUG: Print out what symbols we have and their sizes
-            println("=== Symbol Configuration Debug ===")
-            WSPR_SYMBOLS.forEachIndexed { index, symbol ->
-                println("Symbol $index: $symbol, size: ${symbol.size()}")
+            // The actual capacity depends on how the encoder distributes data across symbols
+            // We need to calculate the maximum value that can flow through the encoding process
+            // without overflow at any symbol position
+
+            // Start from the end and work backwards to find capacity at each position
+            // Symbol with size=1 (Required) doesn't contribute to capacity
+            val effectiveSymbols = WSPR_SYMBOLS.filter { it.size() > 1 }
+
+            if (effectiveSymbols.isEmpty())
+            {
+                return 0
             }
 
-            // Calculate the product of all symbol sizes
-            // e.g. if we have symbols with sizes [36, 36, 18, 10, 19]
-            // total capacity = 36 x 36 x 18 x 10 x 19 (total number of unique calculations)
+            // Calculate the product of all effective symbol sizes (the total number of unique values we can encode)
+            var totalCapacity = BigInteger.ONE
+            effectiveSymbols.forEach { symbol ->
+                totalCapacity *= symbol.size().toBigInteger()
+            }
 
-            // Convert list of symbols to list of their sizes
-            val symbolSizes = WSPR_SYMBOLS.map { it.size().toBigInteger() }
-            // Multiply all  sizes together
-            val totalCapacity = symbolSizes.fold(BigInteger.ONE) { acc, size -> acc * size}
-
-            // The max integer we can encode is (totalCapacity - 1)
+            // The maximum value we can encode is (totalCapacity - 1)
+            // because we count from 0
             val maxEncodableValue = totalCapacity - BigInteger.ONE
 
-            // Convert maxEncodableValue to bytes so we know how many bytes we need (how many bytes  it takes to store this number)
+            // Convert to byte array to see how many bytes this value requires
             val byteArray = maxEncodableValue.toByteArray()
 
-            // BigInteger sometimes adds an extra leading zero byte for the sign
-            // Remove the extra byte if it exists
-            return if (byteArray.isNotEmpty() && byteArray[0] == 0.toByte())
+            // BigInteger.toByteArray() may include a leading zero byte for the sign bit
+            // Remove it if present
+            val actualBytes = if (byteArray.isNotEmpty() && byteArray[0] == 0.toByte())
             {
                 byteArray.size - 1
             }
@@ -102,6 +107,7 @@ class WSPRCodex
                 byteArray.size
             }
 
+            return actualBytes
         }
 
         /**

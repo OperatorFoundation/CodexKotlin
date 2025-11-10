@@ -175,4 +175,34 @@ class EncoderDecoderTest
         }
     }
 
+
+//    @Test
+//    fun testRequiredSymbolValidation()
+//    {
+//        // Test that Required symbol validates correctly
+//        val decoder = Decoder(listOf(Required('X'.code.toByte()), Number()))
+//
+//        // Should decode successfully with 'X'
+//        val validInput = listOf("X".toByteArray(), "5".toByteArray())
+//        val result = decoder.decode(validInput)
+//        assertEquals(BigInteger.valueOf(5), result)
+//
+//        // Should throw with wrong required character
+//        val invalidInput = listOf("Y".toByteArray(), "5".toByteArray())
+//        assertThrows(IllegalArgumentException::class.java) {
+//            decoder.decode(invalidInput)
+//        }
+//    }
+//
+//    @Test
+//    fun testEncoderOverflow()
+//    {
+//        // Test that encoder throws when value is too large
+//        val encoder = Encoder(listOf(Binary(), Binary())) // Max value = 3
+//
+//        assertThrows(Exception::class.java) {
+//            encoder.encode(BigInteger.valueOf(4))
+//        }
+//    }
+
 }
