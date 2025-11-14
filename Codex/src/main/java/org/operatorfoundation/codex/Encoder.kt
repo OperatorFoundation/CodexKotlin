@@ -60,8 +60,6 @@ class Encoder(private val symbols: List<Symbol>)
         if (symbol.size() == 1)
         {
             // (size = 1) don't consume any of the value
-            println("encode_step( current value: $currentValue, symbol: $symbol, index: $index)")
-
             // For debugging: show symbol capacity up to this point
             val symbolsUpToHere = if (index == 0)
             {
@@ -71,31 +69,20 @@ class Encoder(private val symbols: List<Symbol>)
             {
                 symbols.subList(0, symbols.size - index)
             }
-            
-            val symbolSizes = symbolsUpToHere.map { it.size() }
-            val totalCapacity = symbolSizes.fold(1) { acc, size -> acc * size }
-
-            println("history (symbol sizes): $symbolSizes, total capacity: $totalCapacity")
 
             // Symbol with size 1 encodes its fixed value and passes through the current value
             val encodedBytes = symbol.encode(currentValue)
             val result = Pair(encodedBytes, currentValue)
 
-            println("result: (${encodedBytes.decodeToString()}, $currentValue)")
-
             return result
         }
         else
         {
-            println("encode_step(currrent value: $currentValue, symbol: $symbol, index: $index)")
-
             if (index == symbols.size - 1)
             {
                 // Last symbol: encode all remaining value
                 val encodedBytes = symbol.encode(currentValue)
                 val result = Pair(encodedBytes, 0.toBigInteger())
-
-                println("result: (${encodedBytes.decodeToString()}, 0)")
 
                 return result
             }
@@ -104,23 +91,18 @@ class Encoder(private val symbols: List<Symbol>)
                 // Calculate capacity of remaining symbols
                 val remainingSymbols = symbols.subList(index + 1, symbols.size)
                 val remainingSymbolSizes = remainingSymbols.map { it.size() }
-                val remainingCapacity = remainingSymbolSizes.fold(1) { acc, size -> acc * size }
-
-                println("history:\n   remaining symbol sizes $remainingSymbolSizes, remaining capacity: $remainingCapacity")
+                val remainingCapacity = remainingSymbolSizes.fold(BigInteger.ONE) { acc, size -> acc * size.toBigInteger() }
 
                 // Determine value for this symbol position
                 // Division gives us how many "chunks" of remaining capacity we have
-                val symbolValue = (currentValue / remainingCapacity.toBigInteger()).min(symbol.size().toBigInteger() - 1.toBigInteger())
-                println("Symbol value: $symbolValue")
+                val symbolValue = (currentValue / remainingCapacity).min(symbol.size().toBigInteger() - BigInteger.ONE)
 
                 // Modulo gives us what's left for the remaining symbols
-                val leftoverValue = currentValue % remainingCapacity.toBigInteger()
-                println("Leftover value: $leftoverValue")
+                val leftoverValue = currentValue % remainingCapacity
 
                 // Encode this symbol's portion
                 val encodedBytes = symbol.encode(symbolValue)
                 val result = Pair(encodedBytes, leftoverValue)
-                println("result: (${encodedBytes.decodeToString()}, $leftoverValue)")
 
                 return result
             }

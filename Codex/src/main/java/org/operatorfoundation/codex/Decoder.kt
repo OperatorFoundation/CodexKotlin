@@ -55,14 +55,10 @@ class Decoder(private val symbols: List<Symbol>)
         if (symbol.size() == 1)
         {
             // Symbols with size 1 don't contribute to the numeric value
-            println("decode_step(encoded value: ${encodedValue.decodeToString()}, symbol: $symbol, index: $index)")
-
             return 0.toBigInteger()
         }
         else
         {
-            println("decode_step(encoded value: ${encodedValue.decodeToString()}, symbol: $symbol, index: $index)")
-
             if (index == symbols.size - 1)
             {
                 // Last symbol: just return its decoded value
@@ -73,13 +69,11 @@ class Decoder(private val symbols: List<Symbol>)
                 // Calculate product of remaining symbol sizes
                 val remainingSymbols = symbols.subList(index + 1, symbols.size)
                 val remainingSymbolSizes = remainingSymbols.map { it.size() }
-                val positionMultiplier = remainingSymbolSizes.fold(1) { acc, size -> acc * size }
-
-                println("history:/n  remaining symbol sizes - $remainingSymbolSizes, position multiplier: $positionMultiplier")
+                // Use BigInteger to avoid integer overflow when multiplying symbol sizes
+                val positionMultiplier = remainingSymbolSizes.fold(BigInteger.ONE) { acc, size -> acc * size.toBigInteger() }
 
                 // Multiply decoded value by position weight
-                val result = symbol.decode(encodedValue) * positionMultiplier.toBigInteger()
-                println("result: $result")
+                val result = symbol.decode(encodedValue) * positionMultiplier
 
                 return result
             }
