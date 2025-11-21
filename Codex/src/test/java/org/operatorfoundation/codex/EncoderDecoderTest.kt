@@ -176,7 +176,7 @@ class EncoderDecoderTest
             assertEquals(bigIntValue, decoded, "Round-trip failed for value $value")
         }
     }
-}
+
 
 @Test
 fun testWSPRMessageRoundTrip() {
@@ -376,6 +376,7 @@ fun testWSPRMessageSequenceEdgeCases() {
     assertThrows(IllegalArgumentException::class.java) {
         WSPRMessageSequence(-1)
     }
+}
 
 //    @Test
 //    fun testRequiredSymbolValidation()
@@ -405,4 +406,6 @@ fun testWSPRMessageSequenceEdgeCases() {
 //            encoder.encode(BigInteger.valueOf(4))
 //        }
 //    }
+
+
 }
