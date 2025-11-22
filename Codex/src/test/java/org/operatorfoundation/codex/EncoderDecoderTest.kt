@@ -2,407 +2,410 @@ package org.operatorfoundation.codex
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
-import org.operatorfoundation.codex.symbols.Binary
-import org.operatorfoundation.codex.symbols.Symbol
-import org.operatorfoundation.codex.symbols.Number
-import org.operatorfoundation.codex.symbols.Byte
-import org.operatorfoundation.codex.symbols.Required
-import org.operatorfoundation.codex.symbols.CallLetterNumber
-import org.operatorfoundation.codex.symbols.CallLetterSpace
-import org.operatorfoundation.codex.symbols.GridLetter
-import org.operatorfoundation.codex.symbols.Power
-import org.operatorfoundation.codex.symbols.Trinary
-import org.operatorfoundation.codex.symbols.WSPRMessage
-import org.operatorfoundation.codex.symbols.WSPRMessageSequence
-
+import org.operatorfoundation.codex.symbols.*
 import java.math.BigInteger
 
-class EncoderDecoderTest
-{
-    @Test
-    fun testByteEncodingDecoding()
-    {
-        // Create decoder with 4 byte symbols
-        val bytesDecoder = Decoder(listOf(Byte(), Byte(), Byte(), Byte()))
-
-        // Create "Test" as bytes
-        val testBytes = "Test".toByteArray()
-        val testByteArrays = testBytes.map { byteArrayOf(it) }
-
-        // Decode to integer
-        val decodedInteger = bytesDecoder.decode(testByteArrays)
-        println("@ i: $decodedInteger")
-
-        // Verify the decoded value matches Python output
-        // In Python: b'Test' decodes to 1415934836
-        assertEquals(BigInteger.valueOf(1415934836), decodedInteger)
-
-        // Create encoder and encode back
-        val bytesEncoder = bytesDecoder.encoder()
-        val encodedBytes = bytesEncoder.encode(decodedInteger)
-
-        // Convert back to string for verification
-        val reconstructedBytes = encodedBytes.map { it[0] }.toByteArray()
-        val reconstructedString = String(reconstructedBytes)
-
-        println("% bs: ${encodedBytes.map { it[0].toInt() and 0xFF }}, str: $reconstructedString")
-
-        assertEquals("Test", reconstructedString)
-    }
+class SymbolTest {
 
     @Test
-    fun testWSPREncoding() {
-        // First get test integer from byte encoding
-        val bytesDecoder = Decoder(listOf(Byte(), Byte(), Byte(), Byte()))
-        val testByteArrays = "Test".toByteArray().map { byteArrayOf(it) }
-        val testInteger = bytesDecoder.decode(testByteArrays)
+    fun testBinaryEncoding() {
+        // Test encoding 0
+        val encoded0 = Binary.encode(BigInteger.ZERO)
+        assertEquals(0, encoded0.value)
 
-        // Create WSPR encoder - explicitly type as List<Symbol>
-        val wsprEncoder = Encoder(listOf<Symbol>(
-            Required('Q'.code.toByte()),
-            CallLetterNumber(),
-            Number(),
-            CallLetterSpace(),
-            CallLetterSpace(),
-            CallLetterSpace(),
-            GridLetter(),
-            GridLetter(),
-            Number(),
-            Number(),
-            Power()
-        ))
+        // Test encoding 1
+        val encoded1 = Binary.encode(BigInteger.ONE)
+        assertEquals(1, encoded1.value)
 
-        // Encode the integer
-        val wsprEncoding = wsprEncoder.encode(testInteger)
-        println(wsprEncoding.map { it.decodeToString() })
-
-        // Format output like Python
-        val callsign = wsprEncoding.subList(0, 6).joinToString("") { it.decodeToString() }
-        val grid = wsprEncoding.subList(6, 10).joinToString("") { it.decodeToString() }
-        val power = wsprEncoding[10].decodeToString()
-
-        println("WSPR Message: $callsign $grid $power")
-
-        // Verify decoding back to same integer
-        val wsprDecoder = wsprEncoder.decoder()
-        val decodedInteger = wsprDecoder.decode(wsprEncoding)
-        println("$ i: $decodedInteger")
-
-        assertEquals(testInteger, decodedInteger)
-
-        // Encode back to bytes and verify
-        val bytesEncoder = bytesDecoder.encoder()
-        val finalBytes = bytesEncoder.encode(decodedInteger)
-        val finalString = String(finalBytes.map { it[0] }.toByteArray())
-
-        println("% bs: ${finalBytes.map { it[0].toInt() and 0xFF }}, str: $finalString")
-
-        assertEquals("Test", finalString)
-    }
-
-    @Test
-    fun testBinaryTrinaryWithRequired()
-    {
-        // Test with Required('A'), Binary(), Trinary()
-        val encoder = Encoder(listOf(Required('A'.code.toByte()), Binary(), Trinary()))
-
-        val testCases = listOf(
-            0 to listOf("A", "0", "0"),
-            1 to listOf("A", "0", "1"),
-            2 to listOf("A", "0", "2"),
-            3 to listOf("A", "1", "0"),
-            4 to listOf("A", "1", "1"),
-            5 to listOf("A", "1", "2")
-        )
-
-        testCases.forEach { (input, expected) ->
-            val encoding = encoder.encode(BigInteger.valueOf(input.toLong()))
-            val actual = encoding.map { it.decodeToString() }
-
-            println("TEST RESULT input: $input, encoding: $actual")
-
-            assertEquals(expected, actual)
+        // Test invalid value
+        assertThrows(IllegalArgumentException::class.java) {
+            Binary.encode(BigInteger.valueOf(2))
         }
     }
 
     @Test
-    fun testBinaryTrinaryWithoutRequired()
-    {
-        // Test with just Binary(), Trinary()
-        val encoder = Encoder(listOf(Binary(), Trinary()))
+    fun testBinaryDecoding() {
+        val binary0 = Binary.encode(BigInteger.ZERO)
+        val binary1 = Binary.encode(BigInteger.ONE)
 
-        val testCases = listOf(
-            0 to listOf("0", "0"),
-            1 to listOf("0", "1"),
-            2 to listOf("0", "2"),
-            3 to listOf("1", "0"),
-            4 to listOf("1", "1"),
-            5 to listOf("1", "2")
-        )
-
-        testCases.forEach { (input, expected) ->
-            val encoding = encoder.encode(BigInteger.valueOf(input.toLong()))
-            val actual = encoding.map { it.decodeToString() }
-
-            println("TEST RESULT input: $input, encoding: $actual")
-
-            assertEquals(expected, actual)
-        }
+        assertEquals(BigInteger.ZERO, binary0.decode())
+        assertEquals(BigInteger.ONE, binary1.decode())
     }
 
     @Test
-    fun testRoundTrip()
-    {
-        // Test that encoding then decoding returns the original value
-        val symbols = listOf(
-            CallLetterNumber(),
-            Binary(),
-            Trinary(),
-            Number(),
-            CallLetterSpace()
-        )
+    fun testBinaryRoundTrip() {
+        val encoded = Binary.encode(BigInteger.ONE)
+        val decoded = encoded.decode()
+        assertEquals(BigInteger.ONE, decoded)
+    }
 
-        val encoder = Encoder(symbols)
-        val decoder = encoder.decoder()
-
-        // Test various values
-        val testValues = listOf(0, 1, 42, 100, 500, 1000, 5000)
+    @Test
+    fun testByteEncoding() {
+        // Test various byte values
+        val testValues = listOf(0, 1, 127, 128, 255)
 
         testValues.forEach { value ->
-            val bigIntValue = BigInteger.valueOf(value.toLong())
-            val encoded = encoder.encode(bigIntValue)
-            val decoded = decoder.decode(encoded)
+            val encoded = Octet.encode(BigInteger.valueOf(value.toLong()))
+            assertEquals(value, encoded.value)
+        }
 
-            assertEquals(bigIntValue, decoded, "Round-trip failed for value $value")
+        // Test invalid values
+        assertThrows(IllegalArgumentException::class.java) {
+            Octet.encode(BigInteger.valueOf(-1))
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            Octet.encode(BigInteger.valueOf(256))
         }
     }
-}
 
-@Test
-fun testWSPRMessageRoundTrip() {
-    val wsprMessage = WSPRMessage()
+    @Test
+    fun testByteDecoding() {
+        val testValues = listOf(0, 1, 127, 128, 255)
 
-    // Test various values within WSPR message capacity
-    val testValues = listOf(
-        BigInteger.ZERO,
-        BigInteger.ONE,
-        BigInteger.valueOf(1415934836), // "Test" as integer
-        BigInteger.valueOf(123456789),
-        BigInteger.valueOf(999999999),
-        BigInteger("10000000000") // Larger value
-    )
-
-    testValues.forEach { value ->
-        val encoded = wsprMessage.encode(value)
-
-        // Verify size
-        assertEquals(wsprMessage.size(), encoded.size,
-            "Encoded size mismatch for value $value")
-
-        // Decode and verify
-        val decoded = wsprMessage.decode(encoded)
-        assertEquals(value, decoded, "Round-trip failed for value $value")
-
-        println("WSPRMessage round-trip: $value -> ${encoded.size} bytes -> $decoded")
-    }
-}
-
-@Test
-fun testWSPRMessageFormat() {
-    val wsprMessage = WSPRMessage()
-    val testInteger = BigInteger.valueOf(1415934836) // "Test"
-
-    val encoded = wsprMessage.encode(testInteger)
-
-    // Verify the message starts with 'Q'
-    assertEquals('Q'.code.toByte(), encoded[0], "WSPR message should start with 'Q'")
-
-    // Decode and display the message components
-    val parts = mutableListOf<String>()
-    parts.add(encoded[0].toInt().toChar().toString()) // Required 'Q'
-    parts.add((1..6).map { encoded[it].toInt().toChar() }.joinToString("")) // Callsign
-    parts.add((7..8).map { encoded[it].toInt().toChar() }.joinToString("")) // Grid letters
-    parts.add((9..10).map { encoded[it].toInt().toChar() }.joinToString("")) // Grid numbers
-    parts.add(encoded[11].toInt().toChar().toString()) // Power
-
-    println("WSPR Message components: ${parts.joinToString(" ")}")
-
-    // Verify decoding
-    val decoded = wsprMessage.decode(encoded)
-    assertEquals(testInteger, decoded)
-}
-
-@Test
-fun testWSPRMessageSequenceSingleMessage() {
-    // Test with a sequence of 1 message (should behave like WSPRMessage)
-    val sequence = WSPRMessageSequence(1)
-    val singleMessage = WSPRMessage()
-
-    val testValue = BigInteger.valueOf(1415934836)
-
-    val seqEncoded = sequence.encode(testValue)
-    val msgEncoded = singleMessage.encode(testValue)
-
-    // Should produce identical results
-    assertArrayEquals(msgEncoded, seqEncoded)
-
-    // Verify decoding
-    val decoded = sequence.decode(seqEncoded)
-    assertEquals(testValue, decoded)
-}
-
-@Test
-fun testWSPRMessageSequenceMultipleMessages() {
-    // Test with 3 messages
-    val sequence = WSPRMessageSequence(3)
-
-    val testValues = listOf(
-        BigInteger.ZERO,
-        BigInteger.ONE,
-        BigInteger.valueOf(1415934836),
-        BigInteger("100000000000000"), // Large value requiring multiple messages
-        BigInteger("999999999999999999")
-    )
-
-    testValues.forEach { value ->
-        val encoded = sequence.encode(value)
-
-        // Verify total size is 3 × single message size
-        val singleMessageSize = WSPRMessage().size()
-        assertEquals(singleMessageSize * 3, encoded.size,
-            "Sequence size should be 3 × single message size")
-
-        // Decode and verify
-        val decoded = sequence.decode(encoded)
-        assertEquals(value, decoded, "Round-trip failed for value $value")
-
-        println("WSPRMessageSequence(3) round-trip: $value -> ${encoded.size} bytes -> $decoded")
-    }
-}
-
-@Test
-fun testWSPRMessageSequenceCapacity() {
-    // Test that larger sequences can handle larger numbers
-    val sequence2 = WSPRMessageSequence(2)
-    val sequence5 = WSPRMessageSequence(5)
-
-    // A very large number that would overflow a single message
-    val largeValue = BigInteger("123456789012345678901234567890")
-
-    try {
-        val encoded2 = sequence2.encode(largeValue)
-        val decoded2 = sequence2.decode(encoded2)
-        assertEquals(largeValue, decoded2, "Sequence of 2 failed for large value")
-        println("WSPRMessageSequence(2) handled large value successfully")
-    } catch (e: Exception) {
-        println("WSPRMessageSequence(2) cannot handle value (expected if too large)")
+        testValues.forEach { value ->
+            val byteSymbol = Octet.encode(BigInteger.valueOf(value.toLong()))
+            val decoded = byteSymbol.decode()
+            assertEquals(BigInteger.valueOf(value.toLong()), decoded)
+        }
     }
 
-    try {
-        val encoded5 = sequence5.encode(largeValue)
-        val decoded5 = sequence5.decode(encoded5)
-        assertEquals(largeValue, decoded5, "Sequence of 5 failed for large value")
-        println("WSPRMessageSequence(5) handled large value: $largeValue")
-    } catch (e: Exception) {
-        println("WSPRMessageSequence(5) cannot handle value (too large even for 5 messages)")
-    }
-}
-
-@Test
-fun testWSPRMessageSequenceIndependence() {
-    // Verify that each message in the sequence contributes independently
-    val sequence = WSPRMessageSequence(2)
-    val singleMessageSize = WSPRMessage().size()
-
-    val testValue = BigInteger.valueOf(1000000)
-    val encoded = sequence.encode(testValue)
-
-    // Split into two messages
-    val message1 = encoded.sliceArray(0 until singleMessageSize)
-    val message2 = encoded.sliceArray(singleMessageSize until encoded.size)
-
-    println("Message 1 bytes: ${message1.map { (it.toInt() and 0xFF).toString(16) }}")
-    println("Message 2 bytes: ${message2.map { (it.toInt() and 0xFF).toString(16) }}")
-
-    // Both should start with 'Q'
-    assertEquals('Q'.code.toByte(), message1[0], "First message should start with Q")
-    assertEquals('Q'.code.toByte(), message2[0], "Second message should start with Q")
-
-    // Verify full round-trip still works
-    val decoded = sequence.decode(encoded)
-    assertEquals(testValue, decoded)
-}
-
-@Test
-fun testWSPRMessageVsSequenceComparison() {
-    // Compare the capacity and behavior of single vs multiple messages
-    val single = WSPRMessage()
-    val double = WSPRMessageSequence(2)
-
-    // Find a value that fits in single message
-    val smallValue = BigInteger.valueOf(1000)
-    val singleEncoded = single.encode(smallValue)
-    val doubleEncoded = double.encode(smallValue)
-
-    println("Single message size: ${singleEncoded.size} bytes")
-    println("Double sequence size: ${doubleEncoded.size} bytes")
-
-    assertEquals(single.size(), singleEncoded.size)
-    assertEquals(single.size() * 2, doubleEncoded.size)
-
-    // Both should decode correctly
-    assertEquals(smallValue, single.decode(singleEncoded))
-    assertEquals(smallValue, double.decode(doubleEncoded))
-}
-
-@Test
-fun testWSPRMessageSequenceEdgeCases() {
-    // Test edge cases
-    val sequence = WSPRMessageSequence(1)
-
-    // Test zero
-    val zeroEncoded = sequence.encode(BigInteger.ZERO)
-    assertEquals(BigInteger.ZERO, sequence.decode(zeroEncoded))
-
-    // Test one
-    val oneEncoded = sequence.encode(BigInteger.ONE)
-    assertEquals(BigInteger.ONE, sequence.decode(oneEncoded))
-
-    // Test that invalid count throws
-    assertThrows(IllegalArgumentException::class.java) {
-        WSPRMessageSequence(0)
+    @Test
+    fun testByteRoundTrip() {
+        (0..255).forEach { value ->
+            val encoded = Octet.encode(BigInteger.valueOf(value.toLong()))
+            val decoded = encoded.decode()
+            assertEquals(BigInteger.valueOf(value.toLong()), decoded)
+        }
     }
 
-    assertThrows(IllegalArgumentException::class.java) {
-        WSPRMessageSequence(-1)
+    @Test
+    fun testCallAnyEncoding() {
+        // Test encoding letters
+        val encodedA = CallAny.encode(BigInteger.ZERO)
+        assertEquals('A', encodedA.value)
+
+        val encodedZ = CallAny.encode(BigInteger.valueOf(25))
+        assertEquals('Z', encodedZ.value)
+
+        // Test encoding numbers
+        val encoded0 = CallAny.encode(BigInteger.valueOf(26))
+        assertEquals('0', encoded0.value)
+
+        val encoded9 = CallAny.encode(BigInteger.valueOf(35))
+        assertEquals('9', encoded9.value)
+
+        // Test encoding space
+        val encodedSpace = CallAny.encode(BigInteger.valueOf(36))
+        assertEquals(' ', encodedSpace.value)
+
+        // Test invalid value
+        assertThrows(IllegalArgumentException::class.java) {
+            CallAny.encode(BigInteger.valueOf(37))
+        }
     }
 
-//    @Test
-//    fun testRequiredSymbolValidation()
-//    {
-//        // Test that Required symbol validates correctly
-//        val decoder = Decoder(listOf(Required('X'.code.toByte()), Number()))
-//
-//        // Should decode successfully with 'X'
-//        val validInput = listOf("X".toByteArray(), "5".toByteArray())
-//        val result = decoder.decode(validInput)
-//        assertEquals(BigInteger.valueOf(5), result)
-//
-//        // Should throw with wrong required character
-//        val invalidInput = listOf("Y".toByteArray(), "5".toByteArray())
-//        assertThrows(IllegalArgumentException::class.java) {
-//            decoder.decode(invalidInput)
-//        }
-//    }
-//
-//    @Test
-//    fun testEncoderOverflow()
-//    {
-//        // Test that encoder throws when value is too large
-//        val encoder = Encoder(listOf(Binary(), Binary())) // Max value = 3
-//
-//        assertThrows(Exception::class.java) {
-//            encoder.encode(BigInteger.valueOf(4))
-//        }
-//    }
+    @Test
+    fun testCallAnyDecoding() {
+        assertEquals(BigInteger.ZERO, CallAny.encode(BigInteger.ZERO).decode())
+        assertEquals(BigInteger.valueOf(25), CallAny.encode(BigInteger.valueOf(25)).decode())
+        assertEquals(BigInteger.valueOf(26), CallAny.encode(BigInteger.valueOf(26)).decode())
+        assertEquals(BigInteger.valueOf(35), CallAny.encode(BigInteger.valueOf(35)).decode())
+        assertEquals(BigInteger.valueOf(36), CallAny.encode(BigInteger.valueOf(36)).decode())
+    }
+
+    @Test
+    fun testCallLetterEncoding() {
+        // Test all letters
+        ('A'..'Z').forEachIndexed { index, char ->
+            val encoded = CallLetter.encode(BigInteger.valueOf(index.toLong()))
+            assertEquals(char, encoded.value)
+        }
+
+        // Test invalid value
+        assertThrows(IllegalArgumentException::class.java) {
+            CallLetter.encode(BigInteger.valueOf(26))
+        }
+    }
+
+    @Test
+    fun testCallLetterDecoding() {
+        ('A'..'Z').forEachIndexed { index, _ ->
+            val encoded = CallLetter.encode(BigInteger.valueOf(index.toLong()))
+            val decoded = encoded.decode()
+            assertEquals(BigInteger.valueOf(index.toLong()), decoded)
+        }
+    }
+
+    @Test
+    fun testCallLetterNumberEncoding() {
+        // Test letters
+        val encodedA = CallLetterNumber.encode(BigInteger.ZERO)
+        assertEquals('A', encodedA.value)
+
+        val encodedZ = CallLetterNumber.encode(BigInteger.valueOf(25))
+        assertEquals('Z', encodedZ.value)
+
+        // Test numbers
+        val encoded0 = CallLetterNumber.encode(BigInteger.valueOf(26))
+        assertEquals('0', encoded0.value)
+
+        val encoded9 = CallLetterNumber.encode(BigInteger.valueOf(35))
+        assertEquals('9', encoded9.value)
+
+        // Test invalid value
+        assertThrows(IllegalArgumentException::class.java) {
+            CallLetterNumber.encode(BigInteger.valueOf(36))
+        }
+    }
+
+    @Test
+    fun testCallLetterNumberDecoding() {
+        assertEquals(BigInteger.ZERO, CallLetterNumber.encode(BigInteger.ZERO).decode())
+        assertEquals(BigInteger.valueOf(25), CallLetterNumber.encode(BigInteger.valueOf(25)).decode())
+        assertEquals(BigInteger.valueOf(26), CallLetterNumber.encode(BigInteger.valueOf(26)).decode())
+        assertEquals(BigInteger.valueOf(35), CallLetterNumber.encode(BigInteger.valueOf(35)).decode())
+    }
+
+    @Test
+    fun testCallLetterSpaceEncoding() {
+        // Test letters
+        val encodedA = CallLetterSpace.encode(BigInteger.ZERO)
+        assertEquals('A', encodedA.value)
+
+        val encodedZ = CallLetterSpace.encode(BigInteger.valueOf(25))
+        assertEquals('Z', encodedZ.value)
+
+        // Test space
+        val encodedSpace = CallLetterSpace.encode(BigInteger.valueOf(26))
+        assertEquals(' ', encodedSpace.value)
+
+        // Test invalid value
+        assertThrows(IllegalArgumentException::class.java) {
+            CallLetterSpace.encode(BigInteger.valueOf(27))
+        }
+    }
+
+    @Test
+    fun testCallLetterSpaceDecoding() {
+        assertEquals(BigInteger.ZERO, CallLetterSpace.encode(BigInteger.ZERO).decode())
+        assertEquals(BigInteger.valueOf(25), CallLetterSpace.encode(BigInteger.valueOf(25)).decode())
+        assertEquals(BigInteger.valueOf(26), CallLetterSpace.encode(BigInteger.valueOf(26)).decode())
+    }
+
+    @Test
+    fun testGridLetterEncoding() {
+        // Test A-R (18 letters)
+        ('A'..'R').forEachIndexed { index, char ->
+            val encoded = GridLetter.encode(BigInteger.valueOf(index.toLong()))
+            assertEquals(char, encoded.value)
+        }
+
+        // Test invalid value
+        assertThrows(IllegalArgumentException::class.java) {
+            GridLetter.encode(BigInteger.valueOf(18))
+        }
+    }
+
+    @Test
+    fun testGridLetterDecoding() {
+        ('A'..'R').forEachIndexed { index, _ ->
+            val encoded = GridLetter.encode(BigInteger.valueOf(index.toLong()))
+            val decoded = encoded.decode()
+            assertEquals(BigInteger.valueOf(index.toLong()), decoded)
+        }
+    }
+
+    @Test
+    fun testCallNumberEncoding() {
+        // Test 0-9
+        (0..9).forEach { value ->
+            val encoded = CallNumber.encode(BigInteger.valueOf(value.toLong()))
+            assertEquals(value.digitToChar(), encoded.value)
+        }
+
+        // Test invalid value
+        assertThrows(IllegalArgumentException::class.java) {
+            CallNumber.encode(BigInteger.valueOf(10))
+        }
+    }
+
+    @Test
+    fun testCallNumberDecoding() {
+        (0..9).forEach { value ->
+            val encoded = CallNumber.encode(BigInteger.valueOf(value.toLong()))
+            val decoded = encoded.decode()
+            assertEquals(BigInteger.valueOf(value.toLong()), decoded)
+        }
+    }
+
+    @Test
+    fun testGridNumberEncoding() {
+        // Test 0-9
+        (0..9).forEach { value ->
+            val encoded = GridNumber.encode(BigInteger.valueOf(value.toLong()))
+            assertEquals(value.digitToChar(), encoded.value)
+        }
+
+        // Test invalid value
+        assertThrows(IllegalArgumentException::class.java) {
+            GridNumber.encode(BigInteger.valueOf(10))
+        }
+    }
+
+    @Test
+    fun testGridNumberDecoding() {
+        (0..9).forEach { value ->
+            val encoded = GridNumber.encode(BigInteger.valueOf(value.toLong()))
+            val decoded = encoded.decode()
+            assertEquals(BigInteger.valueOf(value.toLong()), decoded)
+        }
+    }
+
+    @Test
+    fun testPowerEncoding() {
+        val powerValues = listOf(
+            0 to 0, 1 to 3, 2 to 7, 3 to 10, 4 to 13, 5 to 17,
+            6 to 20, 7 to 23, 8 to 27, 9 to 30, 10 to 33, 11 to 37,
+            12 to 40, 13 to 43, 14 to 47, 15 to 50, 16 to 53, 17 to 57,
+            18 to 60
+        )
+
+        powerValues.forEach { (index, expectedValue) ->
+            val encoded = Power.encode(BigInteger.valueOf(index.toLong()))
+            assertEquals(expectedValue, encoded.value)
+        }
+
+        // Test invalid value
+        assertThrows(IllegalArgumentException::class.java) {
+            Power.encode(BigInteger.valueOf(19))
+        }
+    }
+
+    @Test
+    fun testPowerDecoding() {
+        (0..18).forEach { index ->
+            val encoded = Power.encode(BigInteger.valueOf(index.toLong()))
+            val decoded = encoded.decode()
+            assertEquals(BigInteger.valueOf(index.toLong()), decoded)
+        }
+    }
+
+    @Test
+    fun testTrinaryEncoding() {
+        // Test 0, 1, 2
+        (0..2).forEach { value ->
+            val encoded = Trinary.encode(BigInteger.valueOf(value.toLong()))
+            assertEquals(value, encoded.value)
+        }
+
+        // Test invalid value
+        assertThrows(IllegalArgumentException::class.java) {
+            Trinary.encode(BigInteger.valueOf(3))
+        }
+    }
+
+    @Test
+    fun testTrinaryDecoding() {
+        (0..2).forEach { value ->
+            val encoded = Trinary.encode(BigInteger.valueOf(value.toLong()))
+            val decoded = encoded.decode()
+            assertEquals(BigInteger.valueOf(value.toLong()), decoded)
+        }
+    }
+
+    @Test
+    fun testWSPRMessageRoundTrip() {
+        val testValues = listOf(
+            BigInteger.ZERO,
+            BigInteger.ONE,
+            BigInteger.valueOf(1415934836),
+            BigInteger.valueOf(123456789)
+        )
+
+        testValues.forEach { value ->
+            val encoded = WSPRMessage.encode(value)
+
+            // Verify it's a valid WSPR message (starts with Q)
+            assertEquals('Q', encoded.prefix.value)
+
+            val decoded = encoded.decode()
+            assertEquals(value, decoded, "Round-trip failed for value $value")
+        }
+    }
+
+    @Test
+    fun testWSPRMessageSequenceRoundTrip() {
+        val testValues = listOf(
+            BigInteger.ZERO,
+            BigInteger.ONE,
+            BigInteger.valueOf(1000000),
+            BigInteger("10000000000"),
+            BigInteger("123456789012345678901234567890")
+        )
+
+        testValues.forEach { value ->
+            // Create an empty sequence (it will be populated during encode)
+            val encoded = WSPRMessageSequence.encode(value)
+
+            // Verify we have at least one message
+            assertTrue(encoded.messages.isNotEmpty(), "Sequence should have at least one message")
+
+            // All messages should start with 'Q'
+            encoded.messages.forEach { message ->
+                assertEquals('Q', message.prefix.value, "Each message should start with Q")
+            }
+
+            val decoded = encoded.decode()
+            assertEquals(value, decoded, "Round-trip failed for value $value")
+        }
+    }
+
+    @Test
+    fun testWSPRMessageSequenceMultipleMessages() {
+        // Test that large values create multiple messages
+        val largeValue = BigInteger("999999999999999999999")
+
+        val encoded = WSPRMessageSequence.encode(largeValue)
+
+        // Should have multiple messages for large value
+        assertTrue(encoded.messages.size > 1, "Large value should create multiple messages")
+
+        println("Large value $largeValue encoded into ${encoded.messages.size} messages")
+
+        // Verify round-trip
+        val decoded = encoded.decode()
+        assertEquals(largeValue, decoded)
+    }
+
+    @Test
+    fun testWSPRMessageSequenceSize() {
+        val size = WSPRMessageSequence.size()
+
+        // Size should be positive
+        assertTrue(size > 0, "Sequence size should be positive")
+
+        // Size should match individual component sizes
+        val expectedSize = (CallLetterNumber.size() * 6) +
+                (GridLetter.size() * 2) +
+                (GridNumber.size() * 2) +
+                Power.size()
+
+        assertEquals(expectedSize, size, "Sequence size calculation incorrect")
+    }
+
+    @Test
+    fun testAllSymbolSizes() {
+        assertEquals(2, Binary.size())
+        assertEquals(256, Octet.size())
+        assertEquals(37, CallAny.size())
+        assertEquals(26, CallLetter.size())
+        assertEquals(36, CallLetterNumber.size())
+        assertEquals(27, CallLetterSpace.size())
+        assertEquals(18, GridLetter.size())
+        assertEquals(10, CallNumber.size())
+        assertEquals(10, GridNumber.size())
+        assertEquals(19, Power.size())
+        assertEquals(0, Required('Q').size())
+        assertEquals(3, Trinary.size())
+    }
 }

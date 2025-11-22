@@ -1,29 +1,37 @@
 package org.operatorfoundation.codex.symbols
+import org.operatorfoundation.codex.Symbol
+import org.operatorfoundation.codex.SymbolFactory
 import java.math.BigInteger
 
-class Trinary : Symbol {
-    companion object {
-        private val charToValue = mapOf(
-            "0" to 0.toBigInteger(),
-            "1" to 1.toBigInteger(),
-            "2" to 2.toBigInteger()
-        )
+class Trinary(val value: Int) : Symbol {
+    companion object : SymbolFactory<Trinary> {
+        const val MAX = 2
 
-        private val valueToChar = charToValue.map { (k, v) -> v to k }.toMap()
+        override fun size(): Int = MAX + 1
+
+        /**
+         * Encodes a numeric value to its byte array representation.
+         * For example, CallLetterNumber encodes 0 to "A".toByteArray(), 1 to "B".toByteArray(), etc.
+         *
+         * @param numericValue The numeric value to encode as BigInteger
+         * @return ByteArray containing the encoded data
+         */
+        override fun encode(numericValue: BigInteger): Trinary {
+            val intValue = numericValue.toInt()
+            if (intValue < 0 || intValue > MAX) {
+                throw IllegalArgumentException("Value $numericValue must be between 0 and $MAX")
+            }
+            return Trinary(intValue)
+        }
     }
 
-    override fun size(): Int = 3
-
-    override fun toString(): String = "Trinary"
-
-    override fun decode(encodedValue: ByteArray): BigInteger {
-        return charToValue[encodedValue.decodeToString()]
-            ?: throw IllegalArgumentException("Trinary, bad value $encodedValue")
+    init {
+        require(value in 0..MAX) { "Trinary value must be 0 or 1, got $value" }
     }
 
-    override fun encode(numericValue: BigInteger): ByteArray {
-        return (valueToChar[numericValue]
-            ?: throw IllegalArgumentException("Unknown value $numericValue for Trinary"))
-            .toByteArray()
+    override fun toString(): String = "Trinary($value)"
+
+    override fun decode(): BigInteger {
+        return value.toBigInteger()
     }
 }

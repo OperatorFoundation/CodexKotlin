@@ -1,59 +1,70 @@
 package org.operatorfoundation.codex.symbols
-
 import java.math.BigInteger
-import org.operatorfoundation.codex.Encoder
+import org.operatorfoundation.codex.*
+import kotlin.reflect.full.companionObjectInstance
 
 /**
  * A sequence of WSPR messages that can encode arbitrarily large integers
  * by splitting them across multiple WSPR transmissions.
- *
- * This enables the Tidbit protocol to send messages larger than a single
- * WSPR message can contain by chaining multiple messages together.
- *
- * @param count Number of WSPR messages in the sequence
  */
-class WSPRMessageSequence(private val count: Int) : Symbol {
-    init {
-        require(count > 0) { "Sequence must contain at least one WSPR message" }
+class WSPRMessageSequence(val messages: List<WSPRMessage>) : Symbol {
+    companion object : SymbolFactory<WSPRMessageSequence> {
+        override fun size(): Int {
+            val callsign = CallLetterNumber::class.companionObjectInstance as? SymbolFactory<*>
+            if (callsign == null) {
+                return 0
+            }
+            val callSignSize = callsign.size()
+
+            val gridLetter = GridLetter::class.companionObjectInstance as? SymbolFactory<*>
+            if (gridLetter == null) {
+                return 0
+            }
+            val gridLetterSize = gridLetter.size()
+
+            val gridNumber = GridNumber::class.companionObjectInstance as? SymbolFactory<*>
+            if (gridNumber == null) {
+                return 0
+            }
+            val gridNumberSize = gridNumber.size()
+
+            val power = Power::class.companionObjectInstance as? SymbolFactory<*>
+            if (power == null) {
+                return 0
+            }
+            val powerSize = power.size()
+
+            return (callSignSize * 6) + (gridLetterSize * 2) + (gridNumberSize * 2) + powerSize
+        }
+
+        override fun encode(numericValue: BigInteger): WSPRMessageSequence {
+            val messages = mutableListOf<WSPRMessage>()
+            var remaining = numericValue
+            val messageSize = size().toBigInteger()
+
+            do {
+                val value = remaining.mod(messageSize)
+                val message = WSPRMessage.encode(value)
+                messages.add(message)
+                remaining = remaining.divide(messageSize)
+            } while (remaining > BigInteger.ZERO)
+
+            return WSPRMessageSequence(messages)
+        }
     }
 
-    private val wsrpMessages: List<Symbol> = List(count) { WSPRMessage() }
-    private val encoder = Encoder(wsrpMessages)
-    private val decoder = encoder.decoder()
+    override fun toString(): String = "WSPRMessageSequence(${messages.size})"
 
-    override fun size(): Int = wsrpMessages.sumOf { it.size() }
+    override fun decode(): BigInteger {
+        var result = BigInteger.ZERO
+        val messageSize = size().toBigInteger()
 
-    override fun toString(): String = "WSPRMessageSequence($count)"
-
-    override fun decode(encodedValue: ByteArray): BigInteger {
-        require(encodedValue.size == size()) {
-            "Encoded value must be ${size()} bytes for $count messages, got ${encodedValue.size}"
+        for(message in messages) {
+            // Process symbols in order (most significant first in mixed-radix)
+            val decoded = message.decode()
+            result = result.multiply(messageSize).add(decoded)
         }
 
-        // Split the encoded byte array into parts for each WSPR message
-        val parts = mutableListOf<ByteArray>()
-        var offset = 0
-
-        for (message in wsrpMessages) {
-            val messageSize = message.size()
-            val messageBytes = encodedValue.sliceArray(offset until offset + messageSize)
-            parts.add(messageBytes)
-            offset += messageSize
-        }
-
-        // Use the decoder to convert the parts back to an integer
-        return decoder.decode(parts)
-    }
-
-    override fun encode(numericValue: BigInteger): ByteArray {
-        // Use the encoder to convert the integer to a list of byte arrays
-        val parts = encoder.encode(numericValue)
-
-        require(parts.size == count) {
-            "Encoder produced ${parts.size} parts but expected $count"
-        }
-
-        // Concatenate all parts into a single byte array
-        return parts.flatMap { it.toList() }.toByteArray()
+        return result
     }
 }

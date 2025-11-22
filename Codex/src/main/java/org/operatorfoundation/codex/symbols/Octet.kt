@@ -3,9 +3,9 @@ import org.operatorfoundation.codex.Symbol
 import org.operatorfoundation.codex.SymbolFactory
 import java.math.BigInteger
 
-class Binary(val value: Int) : Symbol {
-    companion object : SymbolFactory<Binary> {
-        const val MAX = 1
+class Octet(val value: Int) : Symbol {
+    companion object : SymbolFactory<Octet> {
+        const val MAX = 255
 
         override fun size(): Int = MAX + 1
 
@@ -16,20 +16,20 @@ class Binary(val value: Int) : Symbol {
          * @param numericValue The numeric value to encode as BigInteger
          * @return ByteArray containing the encoded data
          */
-        override fun encode(numericValue: BigInteger): Binary {
+        override fun encode(numericValue: BigInteger): Octet {
             val intValue = numericValue.toInt()
             if (intValue < 0 || intValue > MAX) {
                 throw IllegalArgumentException("Value $numericValue must be between 0 and $MAX")
             }
-            return Binary(intValue)
+            return Octet(intValue)
         }
     }
 
     init {
-        require(value in 0..MAX) { "Binary value must be 0 or 1, got $value" }
+        require(value in 0..MAX) { "Octet value must be 0 or 1, got $value" }
     }
 
-    override fun toString(): String = "Binary($value)"
+    override fun toString(): String = "Octet($value)"
 
     override fun decode(): BigInteger {
         return value.toBigInteger()

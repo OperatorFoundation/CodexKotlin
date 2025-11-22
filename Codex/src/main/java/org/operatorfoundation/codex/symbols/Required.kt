@@ -1,26 +1,18 @@
 package org.operatorfoundation.codex.symbols
+import org.operatorfoundation.codex.Symbol
+import org.operatorfoundation.codex.SymbolFactory
 import java.math.BigInteger
 
-class Required(private val r: kotlin.Byte) : Symbol {
-    override fun size(): Int {
-        return 1
+class Required(val value: Char) : Symbol, SymbolFactory<Required> {
+    override fun size(): Int = 0
+
+    override fun toString(): String = "Required($value)"
+
+    override fun encode(numericValue: BigInteger): Required {
+        return Required(value)
     }
 
-    override fun toString(): String {
-        return "Required($r)"
-    }
-
-    override fun encode(numericValue: BigInteger): ByteArray {
-        return byteArrayOf(r)
-    }
-
-    override fun decode(encodedValue: ByteArray): BigInteger {
-        if (encodedValue.size != 1) {
-            throw IllegalArgumentException("Required($r) != $encodedValue")
-        }
-        if (encodedValue[0] != r) {
-            throw IllegalArgumentException("Required($r) != $encodedValue")
-        }
-        return r.toInt().toBigInteger()
+    override fun decode(): BigInteger {
+        return BigInteger.ZERO
     }
 }

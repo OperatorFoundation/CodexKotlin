@@ -1,71 +1,154 @@
 package org.operatorfoundation.codex.symbols
-
+import android.telecom.Call
 import java.math.BigInteger
-import org.operatorfoundation.codex.Encoder
+import org.operatorfoundation.codex.*
 
-/**
- * A single WSPR message symbol that encodes/decodes one complete WSPR transmission.
- *
- * Format: Q + 6-char callsign + 4-char grid + power level = 12 bytes total
- */
-class WSPRMessage : Symbol {
-    /**
-     * WSPR symbol configuration matching the standard WSPR message format.
-     *
-     * Symbol breakdown:
-     * - Required('Q'): Fixed prefix (1 byte, size=1, contributes 0 bits)
-     * - CallLetterNumber (6x): Callsign characters (A-Z, 0-9 = 36 values each)
-     * - GridLetter (2x): First two grid characters (A-R = 18 values each)
-     * - Number (2x): Last two grid characters (0-9 = 10 values each)
-     * - Power: Power level (19 discrete values: 0, 3, 7, 10... 60 dBm)
-     */
-    private val WSPR_SYMBOLS: List<Symbol> = listOf(
-        Required('Q'.code.toByte()),  // Fixed prefix
-        CallLetterNumber(),            // Callsign char 1
-        CallLetterNumber(),            // Callsign char 2
-        CallLetterNumber(),            // Callsign char 3
-        CallLetterNumber(),            // Callsign char 4
-        CallLetterNumber(),            // Callsign char 5
-        CallLetterNumber(),            // Callsign char 6 (often space)
-        GridLetter(),                  // Grid char 1
-        GridLetter(),                  // Grid char 2
-        Number(),                      // Grid char 3
-        Number(),                      // Grid char 4
-        Power()                        // Power level
-    )
+class WSPRMessage(
+    val prefix: Required,
+    val callsign1: CallLetterNumber,
+    val callsign2: CallLetterNumber,
+    val callsign3: CallLetterNumber,
+    val callsign4: CallLetterNumber,
+    val callsign5: CallLetterNumber,
+    val callsign6: CallLetterNumber,
+    val grid1: GridLetter,
+    val grid2: GridLetter,
+    val grid3: GridNumber,
+    val grid4: GridNumber,
+    val power: Power
+) : Symbol {
+    companion object : SymbolFactory<WSPRMessage> {
+        override fun size(): Int = (CallLetterNumber.size() * 6) + (GridLetter.size() * 2) + (GridNumber.size() * 2) + Power.size()
 
-    private val encoder = Encoder(WSPR_SYMBOLS)
-    private val decoder = encoder.decoder()
+        override fun encode(numericValue: BigInteger): WSPRMessage {
+            var remaining = numericValue
 
-    override fun size(): Int = WSPR_SYMBOLS.sumOf { it.size() }
+            // power
+            var size = Power.size()
+            var value = remaining.mod(size.toBigInteger())
+            val power = Power.encode(value)
+            remaining = remaining.divide(size.toBigInteger())
 
-    override fun toString(): String = "WSPRMessage"
+            // grid4
+            size = GridNumber.size()
+            value = remaining.mod(size.toBigInteger())
+            val grid4 = GridNumber.encode(value)
+            remaining = remaining.divide(size.toBigInteger())
 
-    override fun decode(encodedValue: ByteArray): BigInteger {
-        require(encodedValue.size == size()) {
-            "Encoded value must be ${size()} bytes, got ${encodedValue.size}"
+            // grid3
+            size = GridNumber.size()
+            value = remaining.mod(size.toBigInteger())
+            val grid3 = GridNumber.encode(value)
+            remaining = remaining.divide(size.toBigInteger())
+
+            // grid2
+            size = GridLetter.size()
+            value = remaining.mod(size.toBigInteger())
+            val grid2 = GridLetter.encode(value)
+            remaining = remaining.divide(size.toBigInteger())
+
+            // grid1
+            size = GridLetter.size()
+            value = remaining.mod(size.toBigInteger())
+            val grid1 = GridLetter.encode(value)
+            remaining = remaining.divide(size.toBigInteger())
+
+            // callsign6
+            size = CallLetterNumber.size()
+            value = remaining.mod(size.toBigInteger())
+            val callsign6 = CallLetterNumber.encode(value)
+            remaining = remaining.divide(size.toBigInteger())
+
+            // callsign5
+            size = CallLetterNumber.size()
+            value = remaining.mod(size.toBigInteger())
+            val callsign5 = CallLetterNumber.encode(value)
+            remaining = remaining.divide(size.toBigInteger())
+
+            // callsign4
+            size = CallLetterNumber.size()
+            value = remaining.mod(size.toBigInteger())
+            val callsign4 = CallLetterNumber.encode(value)
+            remaining = remaining.divide(size.toBigInteger())
+
+            // callsign3
+            size = CallLetterNumber.size()
+            value = remaining.mod(size.toBigInteger())
+            val callsign3 = CallLetterNumber.encode(value)
+            remaining = remaining.divide(size.toBigInteger())
+
+            // callsign2
+            size = CallLetterNumber.size()
+            value = remaining.mod(size.toBigInteger())
+            val callsign2 = CallLetterNumber.encode(value)
+            remaining = remaining.divide(size.toBigInteger())
+
+            // callsign1
+            size = CallLetterNumber.size()
+            value = remaining.mod(size.toBigInteger())
+            val callsign1 = CallLetterNumber.encode(value)
+            remaining = remaining.divide(size.toBigInteger())
+
+            require(remaining == BigInteger.ZERO) { "Value $numericValue is too large to encode in WSPR" }
+
+            val required = Required('Q')
+
+            return WSPRMessage(required, callsign1, callsign2, callsign3, callsign4, callsign5, callsign6, grid1, grid2, grid3, grid4, power)
         }
-
-        // Split the encoded byte array into parts for each symbol
-        val parts = mutableListOf<ByteArray>()
-        var offset = 0
-
-        for (symbol in WSPR_SYMBOLS) {
-            val symbolSize = symbol.size()
-            val symbolBytes = encodedValue.sliceArray(offset until offset + symbolSize)
-            parts.add(symbolBytes)
-            offset += symbolSize
-        }
-
-        // Use the decoder to convert the parts back to an integer
-        return decoder.decode(parts)
     }
 
-    override fun encode(numericValue: BigInteger): ByteArray {
-        // Use the encoder to convert the integer to a list of byte arrays
-        val parts = encoder.encode(numericValue)
+    override fun toString(): String = "WSPRMessage(${prefix.value}, " +
+            "${callsign1.value}${callsign2.value}${callsign3.value}${callsign4.value}${callsign5.value}${callsign6.value}, " +
+            "${grid1.value}${grid2.value}${grid3.value}${grid4.value}, ${power.value})"
 
-        // Concatenate all parts into a single byte array
-        return parts.flatMap { it.toList() }.toByteArray()
+    override fun decode(): BigInteger {
+        var result = BigInteger.ZERO
+
+        // Process symbols in order (most significant first in mixed-radix)
+        var size = CallLetterNumber.size()
+        var decoded = callsign1.decode()
+        result = result.multiply(size.toBigInteger()).add(decoded)
+
+        size = CallLetterNumber.size()
+        decoded = callsign2.decode()
+        result = result.multiply(size.toBigInteger()).add(decoded)
+
+        size = CallLetterNumber.size()
+        decoded = callsign3.decode()
+        result = result.multiply(size.toBigInteger()).add(decoded)
+
+        size = CallLetterNumber.size()
+        decoded = callsign4.decode()
+        result = result.multiply(size.toBigInteger()).add(decoded)
+
+        size = CallLetterNumber.size()
+        decoded = callsign5.decode()
+        result = result.multiply(size.toBigInteger()).add(decoded)
+
+        size = CallLetterNumber.size()
+        decoded = callsign6.decode()
+        result = result.multiply(size.toBigInteger()).add(decoded)
+
+        size = GridLetter.size()
+        decoded = grid1.decode()
+        result = result.multiply(size.toBigInteger()).add(decoded)
+
+        size = GridLetter.size()
+        decoded = grid2.decode()
+        result = result.multiply(size.toBigInteger()).add(decoded)
+
+        size = GridNumber.size()
+        decoded = grid3.decode()
+        result = result.multiply(size.toBigInteger()).add(decoded)
+
+        size = GridNumber.size()
+        decoded = grid4.decode()
+        result = result.multiply(size.toBigInteger()).add(decoded)
+
+        size = Power.size()
+        decoded = power.decode()
+        result = result.multiply(size.toBigInteger()).add(decoded)
+
+        return result
     }
 }

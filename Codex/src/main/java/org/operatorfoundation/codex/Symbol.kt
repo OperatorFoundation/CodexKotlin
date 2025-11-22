@@ -1,6 +1,17 @@
-package org.operatorfoundation.codex.symbols
+package org.operatorfoundation.codex
 
 import java.math.BigInteger
+
+interface SymbolFactory<T: Symbol>
+{
+    fun encode(numericValue: BigInteger): T
+
+    /**
+     * Returns the number of possible values this symbol can represent.
+     * For example, Binary returns 2, Byte returns 256.
+     */
+    fun size(): Int
+}
 
 /**
  * Base interface for all symbol types that can encode/decode values.
@@ -11,26 +22,11 @@ import java.math.BigInteger
 interface Symbol
 {
     /**
-     * Returns the number of possible values this symbol can represent.
-     * For example, Binary returns 2, Byte returns 256.
-     */
-    fun size(): Int
-
-    /**
      * Decodes a ByteArray to its numeric representation.
      * For example, CallLetterNumber decodes "A".toByteArray() to 0, "B".toByteArray() to 1, etc.
      *
      * @param encodedValue ByteArray containing the encoded data
      * @return The decoded numeric value as BigInteger
      */
-    fun decode(encodedValue: ByteArray): BigInteger
-
-    /**
-     * Encodes a numeric value to its byte array representation.
-     * For example, CallLetterNumber encodes 0 to "A".toByteArray(), 1 to "B".toByteArray(), etc.
-     *
-     * @param numericValue The numeric value to encode as BigInteger
-     * @return ByteArray containing the encoded data
-     */
-    fun encode(numericValue: BigInteger): ByteArray
+    fun decode(): BigInteger
 }

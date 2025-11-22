@@ -1,34 +1,39 @@
 package org.operatorfoundation.codex.symbols
+import org.operatorfoundation.codex.Symbol
+import org.operatorfoundation.codex.SymbolFactory
 import java.math.BigInteger
 
-class GridLetter : Symbol {
-    companion object {
+class GridLetter(val value: Char) : Symbol {
+    companion object : SymbolFactory<GridLetter> {
         private val charToValue = mapOf(
-            "A" to 0.toBigInteger(), "B" to 1.toBigInteger(), "C" to 2.toBigInteger(),
-            "D" to 3.toBigInteger(), "E" to 4.toBigInteger(), "F" to 5.toBigInteger(),
-            "G" to 6.toBigInteger(), "H" to 7.toBigInteger(), "I" to 8.toBigInteger(),
-            "J" to 9.toBigInteger(), "K" to 10.toBigInteger(), "L" to 11.toBigInteger(),
-            "M" to 12.toBigInteger(), "N" to 13.toBigInteger(), "O" to 14.toBigInteger(),
-            "P" to 15.toBigInteger(), "Q" to 16.toBigInteger(), "R" to 17.toBigInteger()
+            'A' to 0, 'B' to 1, 'C' to 2,
+            'D' to 3, 'E' to 4, 'F' to 5,
+            'G' to 6, 'H' to 7, 'I' to 8,
+            'J' to 9, 'K' to 10, 'L' to 11,
+            'M' to 12, 'N' to 13, 'O' to 14,
+            'P' to 15, 'Q' to 16, 'R' to 17
         )
+        private val valueToChar = charToValue.map { (k, v) -> v to k }.toMap()
+        
+        override fun size(): Int = 18
 
-        private val valueToChar = (0..17).associate {
-            it.toBigInteger() to (65 + it).toChar().toString()
+        override fun encode(numericValue: BigInteger): GridLetter {
+            val int = numericValue.toInt()
+            val char = valueToChar[int]
+            if (char != null) {
+                return GridLetter(char)
+            }
+            throw IllegalArgumentException("Unknown value $numericValue for GridLetter")
         }
     }
+    
+    override fun toString(): String = "GridLetter($value)"
 
-    override fun size(): Int = 18
-
-    override fun toString(): String = "GridLetter"
-
-    override fun decode(encodedValue: ByteArray): BigInteger {
-        return charToValue[encodedValue.decodeToString()]
-            ?: throw IllegalArgumentException("GridLetter, bad value $encodedValue")
-    }
-
-    override fun encode(numericValue: BigInteger): ByteArray {
-        return (valueToChar[numericValue]
-            ?: throw IllegalArgumentException("Unknown value $numericValue for GridLetter"))
-            .toByteArray()
+    override fun decode(): BigInteger {
+        val int = charToValue[value]
+        if (int != null) {
+            return int.toBigInteger()
+        }
+        throw IllegalArgumentException("GridLetter, bad value: $value")
     }
 }
