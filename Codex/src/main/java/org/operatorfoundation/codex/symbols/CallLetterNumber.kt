@@ -21,7 +21,7 @@ class CallLetterNumber(val value: Char) : Symbol {
         )
         private val valueToChar = charToValue.map { (k, v) -> v to k }.toMap()
 
-        override fun size(): Int = 36
+        override fun size(): BigInteger = 36.toBigInteger()
 
         override fun encode(numericValue: BigInteger): CallLetterNumber {
             val int = numericValue.toInt()

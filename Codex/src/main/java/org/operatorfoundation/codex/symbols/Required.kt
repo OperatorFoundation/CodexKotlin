@@ -4,7 +4,7 @@ import org.operatorfoundation.codex.SymbolFactory
 import java.math.BigInteger
 
 class Required(val value: Char) : Symbol, SymbolFactory<Required> {
-    override fun size(): Int = 0
+    override fun size(): BigInteger = 0.toBigInteger()
 
     override fun toString(): String = "Required($value)"
 

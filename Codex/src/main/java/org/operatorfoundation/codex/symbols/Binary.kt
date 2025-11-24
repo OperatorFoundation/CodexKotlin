@@ -7,7 +7,7 @@ class Binary(val value: Int) : Symbol {
     companion object : SymbolFactory<Binary> {
         const val MAX = 1
 
-        override fun size(): Int = MAX + 1
+        override fun size(): BigInteger = (MAX + 1).toBigInteger()
 
         /**
          * Encodes a numeric value to its byte array representation.

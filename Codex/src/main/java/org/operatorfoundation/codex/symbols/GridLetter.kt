@@ -15,7 +15,7 @@ class GridLetter(val value: Char) : Symbol {
         )
         private val valueToChar = charToValue.map { (k, v) -> v to k }.toMap()
         
-        override fun size(): Int = 18
+        override fun size(): BigInteger = 18.toBigInteger()
 
         override fun encode(numericValue: BigInteger): GridLetter {
             val int = numericValue.toInt()

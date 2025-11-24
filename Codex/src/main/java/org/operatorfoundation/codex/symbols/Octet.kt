@@ -7,7 +7,7 @@ class Octet(val value: Int) : Symbol {
     companion object : SymbolFactory<Octet> {
         const val MAX = 255
 
-        override fun size(): Int = MAX + 1
+        override fun size(): BigInteger = (MAX + 1).toBigInteger()
 
         /**
          * Encodes a numeric value to its byte array representation.

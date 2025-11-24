@@ -22,7 +22,7 @@ class CallAny(val value: Char) : Symbol {
         )
         private val valueToChar = charToValue.map { (k, v) -> v to k }.toMap()
 
-        override fun size(): Int = 37
+        override fun size(): BigInteger = 37.toBigInteger()
 
         override fun encode(numericValue: BigInteger): CallAny {
             val int = numericValue.toInt()

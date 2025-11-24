@@ -19,7 +19,7 @@ class CallLetterSpace(val value: Char) : Symbol {
         )
         private val valueToChar = charToValue.map { (k, v) -> v to k }.toMap()
 
-        override fun size(): Int = 27
+        override fun size(): BigInteger = 27.toBigInteger()
 
         override fun encode(numericValue: BigInteger): CallLetterSpace {
             val int = numericValue.toInt()

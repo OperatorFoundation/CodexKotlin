@@ -18,76 +18,86 @@ class WSPRMessage(
     val power: Power
 ) : Symbol {
     companion object : SymbolFactory<WSPRMessage> {
-        override fun size(): Int = (CallLetterNumber.size() * 6) + (GridLetter.size() * 2) + (GridNumber.size() * 2) + Power.size()
+        override fun size(): BigInteger {
+            val callsignCapacity = BigInteger.valueOf(CallLetterNumber.size().toLong()).pow(6)
+            val gridLetterCapacity = BigInteger.valueOf(GridLetter.size().toLong()).pow(2)
+            val gridNumberCapacity = BigInteger.valueOf(GridNumber.size().toLong()).pow(2)
+            val powerCapacity = Power.size()
+
+            return callsignCapacity
+                .multiply(gridLetterCapacity)
+                .multiply(gridNumberCapacity)
+                .multiply(powerCapacity)
+        }
 
         override fun encode(numericValue: BigInteger): WSPRMessage {
             var remaining = numericValue
 
             // power
             var size = Power.size()
-            var value = remaining.mod(size.toBigInteger())
+            var value = remaining.mod(size)
             val power = Power.encode(value)
-            remaining = remaining.divide(size.toBigInteger())
+            remaining = remaining.divide(size)
 
             // grid4
             size = GridNumber.size()
-            value = remaining.mod(size.toBigInteger())
+            value = remaining.mod(size)
             val grid4 = GridNumber.encode(value)
-            remaining = remaining.divide(size.toBigInteger())
+            remaining = remaining.divide(size)
 
             // grid3
             size = GridNumber.size()
-            value = remaining.mod(size.toBigInteger())
+            value = remaining.mod(size)
             val grid3 = GridNumber.encode(value)
-            remaining = remaining.divide(size.toBigInteger())
+            remaining = remaining.divide(size)
 
             // grid2
             size = GridLetter.size()
-            value = remaining.mod(size.toBigInteger())
+            value = remaining.mod(size)
             val grid2 = GridLetter.encode(value)
-            remaining = remaining.divide(size.toBigInteger())
+            remaining = remaining.divide(size)
 
             // grid1
             size = GridLetter.size()
-            value = remaining.mod(size.toBigInteger())
+            value = remaining.mod(size)
             val grid1 = GridLetter.encode(value)
-            remaining = remaining.divide(size.toBigInteger())
+            remaining = remaining.divide(size)
 
             // callsign6
             size = CallLetterNumber.size()
-            value = remaining.mod(size.toBigInteger())
+            value = remaining.mod(size)
             val callsign6 = CallLetterNumber.encode(value)
-            remaining = remaining.divide(size.toBigInteger())
+            remaining = remaining.divide(size)
 
             // callsign5
             size = CallLetterNumber.size()
-            value = remaining.mod(size.toBigInteger())
+            value = remaining.mod(size)
             val callsign5 = CallLetterNumber.encode(value)
-            remaining = remaining.divide(size.toBigInteger())
+            remaining = remaining.divide(size)
 
             // callsign4
             size = CallLetterNumber.size()
-            value = remaining.mod(size.toBigInteger())
+            value = remaining.mod(size)
             val callsign4 = CallLetterNumber.encode(value)
-            remaining = remaining.divide(size.toBigInteger())
+            remaining = remaining.divide(size)
 
             // callsign3
             size = CallLetterNumber.size()
-            value = remaining.mod(size.toBigInteger())
+            value = remaining.mod(size)
             val callsign3 = CallLetterNumber.encode(value)
-            remaining = remaining.divide(size.toBigInteger())
+            remaining = remaining.divide(size)
 
             // callsign2
             size = CallLetterNumber.size()
-            value = remaining.mod(size.toBigInteger())
+            value = remaining.mod(size)
             val callsign2 = CallLetterNumber.encode(value)
-            remaining = remaining.divide(size.toBigInteger())
+            remaining = remaining.divide(size)
 
             // callsign1
             size = CallLetterNumber.size()
-            value = remaining.mod(size.toBigInteger())
+            value = remaining.mod(size)
             val callsign1 = CallLetterNumber.encode(value)
-            remaining = remaining.divide(size.toBigInteger())
+            remaining = remaining.divide(size)
 
             require(remaining == BigInteger.ZERO) { "Value $numericValue is too large to encode in WSPR" }
 
@@ -107,47 +117,47 @@ class WSPRMessage(
         // Process symbols in order (most significant first in mixed-radix)
         var size = CallLetterNumber.size()
         var decoded = callsign1.decode()
-        result = result.multiply(size.toBigInteger()).add(decoded)
+        result = result.multiply(size).add(decoded)
 
         size = CallLetterNumber.size()
         decoded = callsign2.decode()
-        result = result.multiply(size.toBigInteger()).add(decoded)
+        result = result.multiply(size).add(decoded)
 
         size = CallLetterNumber.size()
         decoded = callsign3.decode()
-        result = result.multiply(size.toBigInteger()).add(decoded)
+        result = result.multiply(size).add(decoded)
 
         size = CallLetterNumber.size()
         decoded = callsign4.decode()
-        result = result.multiply(size.toBigInteger()).add(decoded)
+        result = result.multiply(size).add(decoded)
 
         size = CallLetterNumber.size()
         decoded = callsign5.decode()
-        result = result.multiply(size.toBigInteger()).add(decoded)
+        result = result.multiply(size).add(decoded)
 
         size = CallLetterNumber.size()
         decoded = callsign6.decode()
-        result = result.multiply(size.toBigInteger()).add(decoded)
+        result = result.multiply(size).add(decoded)
 
         size = GridLetter.size()
         decoded = grid1.decode()
-        result = result.multiply(size.toBigInteger()).add(decoded)
+        result = result.multiply(size).add(decoded)
 
         size = GridLetter.size()
         decoded = grid2.decode()
-        result = result.multiply(size.toBigInteger()).add(decoded)
+        result = result.multiply(size).add(decoded)
 
         size = GridNumber.size()
         decoded = grid3.decode()
-        result = result.multiply(size.toBigInteger()).add(decoded)
+        result = result.multiply(size).add(decoded)
 
         size = GridNumber.size()
         decoded = grid4.decode()
-        result = result.multiply(size.toBigInteger()).add(decoded)
+        result = result.multiply(size).add(decoded)
 
         size = Power.size()
         decoded = power.decode()
-        result = result.multiply(size.toBigInteger()).add(decoded)
+        result = result.multiply(size).add(decoded)
 
         return result
     }

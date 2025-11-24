@@ -13,7 +13,7 @@ class Power(val value: Int) : Symbol {
         )
         private val powerToIndex = indexToPower.map { (k, v) -> v to k }.toMap()
 
-        override fun size(): Int = 19
+        override fun size(): BigInteger = 19.toBigInteger()
 
         override fun encode(numericValue: BigInteger): Power {
             val powerValue = indexToPower[numericValue.toInt()]

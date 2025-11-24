@@ -10,7 +10,7 @@ interface SymbolFactory<T: Symbol>
      * Returns the number of possible values this symbol can represent.
      * For example, Binary returns 2, Byte returns 256.
      */
-    fun size(): Int
+    fun size(): BigInteger
 }
 
 /**

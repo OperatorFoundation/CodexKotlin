@@ -13,7 +13,7 @@ class GridNumber(val value: Char) : Symbol {
         )
         private val valueToChar = charToValue.map { (k, v) -> v to k }.toMap()
         
-        override fun size(): Int = 10
+        override fun size(): BigInteger = 10.toBigInteger()
 
         override fun encode(numericValue: BigInteger): GridNumber {
             val int = numericValue.toInt()

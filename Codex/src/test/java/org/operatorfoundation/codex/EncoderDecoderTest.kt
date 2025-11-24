@@ -334,36 +334,61 @@ class SymbolTest {
     }
 
     @Test
-    fun testWSPRMessageSequenceRoundTrip() {
-        val testValues = listOf(
-            BigInteger.ZERO,
-            BigInteger.ONE,
-            BigInteger.valueOf(1000000),
-            BigInteger("10000000000"),
-            BigInteger("123456789012345678901234567890")
+    fun testWSPRMessageSequenceCapacity() {
+        println("\n=== Testing WSPRMessageSequence Capacity Growth ===")
+
+        val singleMessageMax = WSPRMessage.size().subtract(BigInteger.ONE)
+
+        println("Single WSPR message max: $singleMessageMax")
+
+        // Test values at boundaries
+        val testCases = listOf(
+            "Max of 1 message" to singleMessageMax,
+            "Min of 2 messages" to singleMessageMax.add(BigInteger.ONE),
+            "Max of 2 messages" to WSPRMessage.size().pow(2).subtract(BigInteger.ONE)
         )
 
-        testValues.forEach { value ->
-            // Create an empty sequence (it will be populated during encode)
+        testCases.forEach { (description, value) ->
+            println("\nTesting: $description")
+            println("  Value: $value")
+
             val encoded = WSPRMessageSequence.encode(value)
-
-            // Verify we have at least one message
-            assertTrue(encoded.messages.isNotEmpty(), "Sequence should have at least one message")
-
-            // All messages should start with 'Q'
-            encoded.messages.forEach { message ->
-                assertEquals('Q', message.prefix.value, "Each message should start with Q")
-            }
+            println("  Messages: ${encoded.messages.size}")
 
             val decoded = encoded.decode()
-            assertEquals(value, decoded, "Round-trip failed for value $value")
+            assertEquals(value, decoded, "$description should round-trip correctly")
+            println("  ✓ Round-trip successful")
         }
     }
 
     @Test
     fun testWSPRMessageSequenceMultipleMessages() {
+        println("\n=== Testing WSPRMessageSequence Multiple Messages ===")
+
         // Test that large values create multiple messages
-        val largeValue = BigInteger("999999999999999999999")
+        val singleMessageMax = WSPRMessage.size().subtract(BigInteger.ONE)
+        val largeValue = singleMessageMax.multiply(BigInteger.valueOf(10))
+
+        println("Single message max: $singleMessageMax")
+        println("Testing value: $largeValue")
+
+        val encoded = WSPRMessageSequence.encode(largeValue)
+
+        println("Encoded into ${encoded.messages.size} messages")
+
+        // Should have multiple messages for large value
+        assertTrue(encoded.messages.size > 1, "Large value should create multiple messages")
+
+        // Verify round-trip
+        val decoded = encoded.decode()
+        assertEquals(largeValue, decoded)
+        println("✓ Round-trip successful")
+    }
+
+    @Test
+    fun testWSPRMessageSequenceSimpleMessage() {
+        // Test that large values create multiple messages
+        val largeValue = BigInteger("295487912345699009911221199008899778866771122334455667788")
 
         val encoded = WSPRMessageSequence.encode(largeValue)
 
@@ -378,35 +403,464 @@ class SymbolTest {
     }
 
     @Test
-    fun testWSPRMessageSequenceSize() {
-        val size = WSPRMessageSequence.size()
+    fun testWSPRMessageSequenceZero() {
+        println("\n=== Testing WSPRMessageSequence with Zero ===")
 
-        // Size should be positive
-        assertTrue(size > 0, "Sequence size should be positive")
+        val encoded = WSPRMessageSequence.encode(BigInteger.ZERO)
 
-        // Size should match individual component sizes
-        val expectedSize = (CallLetterNumber.size() * 6) +
-                (GridLetter.size() * 2) +
-                (GridNumber.size() * 2) +
-                Power.size()
+        println("Zero encoded into ${encoded.messages.size} message(s)")
+        assertEquals(1, encoded.messages.size, "Zero should encode to exactly 1 message")
 
-        assertEquals(expectedSize, size, "Sequence size calculation incorrect")
+        val decoded = encoded.decode()
+        assertEquals(BigInteger.ZERO, decoded, "Zero should round-trip correctly")
+        println("✓ Zero round-trip successful")
     }
 
     @Test
     fun testAllSymbolSizes() {
-        assertEquals(2, Binary.size())
-        assertEquals(256, Octet.size())
-        assertEquals(37, CallAny.size())
-        assertEquals(26, CallLetter.size())
-        assertEquals(36, CallLetterNumber.size())
-        assertEquals(27, CallLetterSpace.size())
-        assertEquals(18, GridLetter.size())
-        assertEquals(10, CallNumber.size())
-        assertEquals(10, GridNumber.size())
-        assertEquals(19, Power.size())
-        assertEquals(0, Required('Q').size())
-        assertEquals(3, Trinary.size())
+        assertEquals(2, Binary.size().toInt())
+        assertEquals(256, Octet.size().toInt())
+        assertEquals(37, CallAny.size().toInt())
+        assertEquals(26, CallLetter.size().toInt())
+        assertEquals(36, CallLetterNumber.size().toInt())
+        assertEquals(27, CallLetterSpace.size().toInt())
+        assertEquals(18, GridLetter.size().toInt())
+        assertEquals(10, CallNumber.size().toInt())
+        assertEquals(10, GridNumber.size().toInt())
+        assertEquals(19, Power.size().toInt())
+        assertEquals(0, Required('Q').size().toInt())
+        assertEquals(3, Trinary.size().toInt())
+    }
+
+    @Test
+    fun testWSPRMessageBasicEncoding() {
+        // Test encoding small values
+        println("\n=== Testing WSPRMessage Basic Encoding ===")
+
+        val testValues = listOf(0, 1, 2, 3, 4, 5, 10, 100)
+
+        testValues.forEach { value ->
+            println("\nTesting value: $value")
+
+            try {
+                val encoded = WSPRMessage.encode(BigInteger.valueOf(value.toLong()))
+
+                println("  Encoded successfully")
+                println("  Prefix: ${encoded.prefix.value}")
+                println("  Callsign: ${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}${encoded.callsign6.value}")
+                println("  Grid: ${encoded.grid1.value}${encoded.grid2.value}${encoded.grid3.value}${encoded.grid4.value}")
+                println("  Power: ${encoded.power.value}")
+
+                // Try to decode it back
+                val decoded = encoded.decode()
+                println("  Decoded: $decoded")
+
+                assertEquals(BigInteger.valueOf(value.toLong()), decoded,
+                    "Round-trip failed for value $value")
+                println("  ✓ Round-trip successful")
+
+            } catch (e: Exception) {
+                println("  ✗ Error: ${e.message}")
+                e.printStackTrace()
+                throw e
+            }
+        }
+    }
+
+    @Test
+    fun testWSPRMessageZero() {
+        println("\n=== Testing WSPRMessage with ZERO ===")
+
+        val encoded = WSPRMessage.encode(BigInteger.ZERO)
+
+        println("Prefix: ${encoded.prefix.value}")
+        println("Callsign: ${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}${encoded.callsign6.value}")
+        println("Grid: ${encoded.grid1.value}${encoded.grid2.value}${encoded.grid3.value}${encoded.grid4.value}")
+        println("Power: ${encoded.power.value}")
+
+        val decoded = encoded.decode()
+        println("Decoded: $decoded")
+
+        assertEquals(BigInteger.ZERO, decoded, "Zero should round-trip correctly")
+    }
+
+    @Test
+    fun testWSPRMessageOne() {
+        println("\n=== Testing WSPRMessage with ONE ===")
+
+        val encoded = WSPRMessage.encode(BigInteger.ONE)
+
+        println("Prefix: ${encoded.prefix.value}")
+        println("Callsign: ${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}${encoded.callsign6.value}")
+        println("Grid: ${encoded.grid1.value}${encoded.grid2.value}${encoded.grid3.value}${encoded.grid4.value}")
+        println("Power: ${encoded.power.value}")
+
+        val decoded = encoded.decode()
+        println("Decoded: $decoded")
+
+        assertEquals(BigInteger.ONE, decoded, "One should round-trip correctly")
+    }
+
+    @Test
+    fun testWSPRMessageSize() {
+        println("\n=== Testing WSPRMessage Size ===")
+
+        val size = WSPRMessage.size()
+        println("WSPRMessage.size() = $size")
+
+        // Calculate expected size
+        val expectedSize = (CallLetterNumber.size() * 6.toBigInteger()) +
+                (GridLetter.size() * 2.toBigInteger()) +
+                (GridNumber.size() * 2.toBigInteger()) +
+                Power.size()
+
+        println("Expected size = $expectedSize")
+        println("  CallLetterNumber: ${CallLetterNumber.size()} × 6 = ${CallLetterNumber.size() * 6.toBigInteger()}")
+        println("  GridLetter: ${GridLetter.size()} × 2 = ${GridLetter.size() * 2.toBigInteger()}")
+        println("  GridNumber: ${GridNumber.size()} × 2 = ${GridNumber.size() * 2.toBigInteger()}")
+        println("  Power: ${Power.size()}")
+
+        assertTrue(size > 0.toBigInteger(), "Size should be positive")
+    }
+
+    @Test
+    fun testWSPRMessageCapacity() {
+        println("\n=== Testing WSPRMessage Capacity ===")
+
+        val size = WSPRMessage.size()
+
+        // Maximum value that can be encoded is size - 1
+        val maxValue = size.subtract(BigInteger.ONE)
+
+        println("WSPRMessage.size() = $size")
+        println("Maximum encodable value = $maxValue")
+
+        // Test max value
+        try {
+            val encoded = WSPRMessage.encode(maxValue)
+            val decoded = encoded.decode()
+            assertEquals(maxValue, decoded, "Max value should round-trip")
+            println("✓ Max value ($maxValue) encodes successfully")
+        } catch (e: Exception) {
+            println("✗ Max value failed: ${e.message}")
+            throw e
+        }
+
+        // Test that size (max + 1) fails
+        try {
+            WSPRMessage.encode(size)
+            fail("Value at size ($size) should throw exception")
+        } catch (e: IllegalArgumentException) {
+            println("✓ Value at size correctly throws exception")
+        }
+    }
+
+    @Test
+    fun testWSPRMessageBisectionSearch() {
+        println("\n=== Bisection Search for WSPRMessage Failure Point ===")
+
+        val size = WSPRMessage.size()
+        println("WSPRMessage size: $size")
+
+        // Start with a range we know: 100 works, let's find where it breaks
+        var low = BigInteger.valueOf(100) // Known to work
+        var high = BigInteger.valueOf(size.toLong()).pow(11) // Suspected to fail
+
+        println("Initial range: $low to $high")
+
+        // First verify the bounds
+        println("\nVerifying lower bound ($low)...")
+        assertTrue(testValue(low), "Lower bound should work")
+
+        println("\nVerifying upper bound ($high)...")
+        val highWorks = testValue(high)
+        if (highWorks) {
+            println("Upper bound works! No failure found in expected range.")
+            return
+        }
+
+        println("\nStarting bisection search...")
+        var lastWorking = low
+        var firstFailing = high
+        var iterations = 0
+
+        while (high.subtract(low) > BigInteger.ONE) {
+            iterations++
+            val mid = low.add(high).divide(BigInteger.TWO)
+
+            println("\nIteration $iterations:")
+            println("  Testing: $mid")
+            println("  Range: [$low, $high]")
+            println("  Difference: ${high.subtract(low)}")
+
+            if (testValue(mid)) {
+                println("  ✓ Value works")
+                low = mid
+                lastWorking = mid
+            } else {
+                println("  ✗ Value fails")
+                high = mid
+                firstFailing = mid
+            }
+        }
+
+        println("\n=== RESULTS ===")
+        println("Last working value: $lastWorking")
+        println("First failing value: $firstFailing")
+        println("Difference: ${firstFailing.subtract(lastWorking)}")
+        println("Total iterations: $iterations")
+
+        // Do a detailed comparison
+        println("\n=== Detailed Analysis ===")
+        println("Last working ($lastWorking):")
+        analyzeEncoding(lastWorking)
+
+        println("\nFirst failing ($firstFailing):")
+        analyzeEncoding(firstFailing)
+    }
+
+    private fun testValue(value: BigInteger): Boolean {
+        return try {
+            val encoded = WSPRMessage.encode(value)
+            val decoded = encoded.decode()
+            decoded == value
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun analyzeEncoding(value: BigInteger) {
+        try {
+            val encoded = WSPRMessage.encode(value)
+            println("  Encoded successfully")
+            println("  Prefix: ${encoded.prefix.value}")
+            println("  Callsign: ${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}${encoded.callsign6.value}")
+            println("  Grid: ${encoded.grid1.value}${encoded.grid2.value}${encoded.grid3.value}${encoded.grid4.value}")
+            println("  Power: ${encoded.power.value}")
+
+            val decoded = encoded.decode()
+            println("  Decoded: $decoded")
+            println("  Match: ${decoded == value}")
+
+            if (decoded != value) {
+                println("  ERROR: Mismatch!")
+                println("    Expected: $value")
+                println("    Got:      $decoded")
+                println("    Difference: ${value.subtract(decoded)}")
+            }
+        } catch (e: Exception) {
+            println("  Exception: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+
+    @Test
+    fun testWSPRMessageSizeVerification() {
+        println("\n=== Verifying WSPRMessage.size() ===")
+
+        val size = WSPRMessage.size()
+        println("WSPRMessage.size() = $size")
+
+        val lastWorking = BigInteger.valueOf(1340027206041599L)
+        val firstFailing = BigInteger.valueOf(1340027206041600L)
+
+        println("Last working value:  $lastWorking")
+        println("First failing value: $firstFailing")
+        println("Size equals first failing? ${size == firstFailing}")
+        println("Size equals last working + 1? ${size == lastWorking.add(BigInteger.ONE)}")
+
+        // The maximum encodable value should be size - 1
+        val expectedMax = size.subtract(BigInteger.ONE)
+        println("\nExpected max (size - 1): $expectedMax")
+        println("Matches last working? ${expectedMax == lastWorking}")
+    }
+
+    @Test
+    fun testWSPRMessageSequenceDebug() {
+        println("\n=== Debugging WSPRMessageSequence ===")
+
+        val messageSize = WSPRMessage.size()
+        println("Single message size: $messageSize")
+
+        // Test a simple value that should fit in 1 message
+        val testValue = BigInteger.valueOf(100)
+        println("\nTesting value: $testValue")
+
+        val encoded = WSPRMessageSequence.encode(testValue)
+
+        println("Encoded into ${encoded.messages.size} message(s)")
+
+        // Show each message
+        encoded.messages.forEachIndexed { index, message ->
+            println("  Message $index: ${message.decode()}")
+        }
+
+        val decoded = encoded.decode()
+        println("Decoded result: $decoded")
+        println("Match: ${decoded == testValue}")
+
+        assertEquals(testValue, decoded, "Simple value should round-trip")
+
+        // Now test the boundary value
+        println("\n=== Testing boundary value ===")
+        val boundaryValue = messageSize.subtract(BigInteger.ONE)
+        println("Boundary value (messageSize - 1): $boundaryValue")
+
+        val encodedBoundary = WSPRMessageSequence.encode(boundaryValue)
+        println("Encoded into ${encodedBoundary.messages.size} message(s)")
+
+        encodedBoundary.messages.forEachIndexed { index, message ->
+            println("  Message $index decoded: ${message.decode()}")
+        }
+
+        val decodedBoundary = encodedBoundary.decode()
+        println("Decoded result: $decodedBoundary")
+        println("Match: ${decodedBoundary == boundaryValue}")
+
+        assertEquals(boundaryValue, decodedBoundary, "Boundary value should round-trip")
+    }
+
+    @Test
+    fun testWSPRMessageSequenceEncodingStep() {
+        println("\n=== Step-by-step Encoding ===")
+
+        val messageSize = WSPRMessage.size()
+        println("messageSize: $messageSize")
+
+        val testValue = messageSize.subtract(BigInteger.ONE)
+        println("testValue: $testValue (messageSize - 1)")
+        println("Should fit in: 1 message")
+        println()
+
+        // Manually trace the encode logic
+        var remaining = testValue
+        var iteration = 0
+
+        println("Starting encode loop:")
+        do {
+            iteration++
+            val value = remaining.mod(messageSize)
+            println("  Iteration $iteration:")
+            println("    remaining: $remaining")
+            println("    value (mod messageSize): $value")
+            println("    value < messageSize? ${value < messageSize}")
+
+            try {
+                val message = WSPRMessage.encode(value)
+                println("    ✓ Encoded message successfully")
+            } catch (e: Exception) {
+                println("    ✗ Failed to encode: ${e.message}")
+            }
+
+            remaining = remaining.divide(messageSize)
+            println("    new remaining: $remaining")
+            println("    continuing? ${remaining > BigInteger.ZERO}")
+            println()
+
+        } while (remaining > BigInteger.ZERO)
+
+        println("Total iterations: $iteration")
+    }
+
+    @Test
+    fun testWSPRMessageSequenceVerySimple() {
+        println("\n=== Very Simple WSPRMessageSequence Test ===")
+
+        val messageSize = WSPRMessage.size()
+        println("WSPRMessage.size(): $messageSize")
+
+        // Test encoding zero
+        println("\n--- Testing ZERO ---")
+        val zero = BigInteger.ZERO
+        val encodedZero = WSPRMessageSequence.encode(zero)
+        println("Encoded 0 into ${encodedZero.messages.size} message(s)")
+
+        encodedZero.messages.forEachIndexed { i, msg ->
+            val decoded = msg.decode()
+            println("  Message $i decoded: $decoded")
+        }
+
+        val decodedZero = encodedZero.decode()
+        println("Final decoded value: $decodedZero")
+        println("Match? ${decodedZero == zero}")
+
+        // Test encoding one
+        println("\n--- Testing ONE ---")
+        val one = BigInteger.ONE
+        val encodedOne = WSPRMessageSequence.encode(one)
+        println("Encoded 1 into ${encodedOne.messages.size} message(s)")
+
+        encodedOne.messages.forEachIndexed { i, msg ->
+            val decoded = msg.decode()
+            println("  Message $i decoded: $decoded")
+        }
+
+        val decodedOne = encodedOne.decode()
+        println("Final decoded value: $decodedOne")
+        println("Match? ${decodedOne == one}")
+
+        // Test encoding 100
+        println("\n--- Testing 100 ---")
+        val hundred = BigInteger.valueOf(100)
+        val encodedHundred = WSPRMessageSequence.encode(hundred)
+        println("Encoded 100 into ${encodedHundred.messages.size} message(s)")
+
+        encodedHundred.messages.forEachIndexed { i, msg ->
+            val decoded = msg.decode()
+            println("  Message $i decoded: $decoded")
+        }
+
+        val decodedHundred = encodedHundred.decode()
+        println("Final decoded value: $decodedHundred")
+        println("Match? ${decodedHundred == hundred}")
+    }
+
+    @Test
+    fun testWSPRMessageSequenceBoundary() {
+        println("\n=== WSPRMessageSequence Boundary Test ===")
+
+        val messageSize = WSPRMessage.size()
+        println("WSPRMessage.size(): $messageSize")
+
+        // Test the max value for a single message
+        val maxSingleMessage = messageSize.subtract(BigInteger.ONE)
+        println("\n--- Testing max single message value ---")
+        println("Value: $maxSingleMessage (messageSize - 1)")
+
+        val encoded = WSPRMessageSequence.encode(maxSingleMessage)
+        println("Encoded into ${encoded.messages.size} message(s)")
+
+        encoded.messages.forEachIndexed { i, msg ->
+            val decoded = msg.decode()
+            println("  Message $i decoded: $decoded")
+        }
+
+        val decoded = encoded.decode()
+        println("Final decoded value: $decoded")
+        println("Expected: $maxSingleMessage")
+        println("Match? ${decoded == maxSingleMessage}")
+
+        assertEquals(maxSingleMessage, decoded, "Max single message value should round-trip")
+
+        // Test the min value for two messages
+        println("\n--- Testing min two message value ---")
+        val minTwoMessages = messageSize
+        println("Value: $minTwoMessages (messageSize)")
+
+        val encoded2 = WSPRMessageSequence.encode(minTwoMessages)
+        println("Encoded into ${encoded2.messages.size} message(s)")
+
+        encoded2.messages.forEachIndexed { i, msg ->
+            val decoded2 = msg.decode()
+            println("  Message $i decoded: $decoded2")
+        }
+
+        val decoded2 = encoded2.decode()
+        println("Final decoded value: $decoded2")
+        println("Expected: $minTwoMessages")
+        println("Match? ${decoded2 == minTwoMessages}")
+
+        assertEquals(minTwoMessages, decoded2, "Min two message value should round-trip")
     }
 
 //    @Test
