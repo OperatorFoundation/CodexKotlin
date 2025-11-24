@@ -44,4 +44,9 @@ class WSPRMessageSequence(val messages: List<WSPRMessage>) : Symbol {
 
         return result
     }
+
+    fun extractValues(): List<Triple<String, String, Int>>
+    {
+        return messages.map { it.extractValues() }
+    }
 }

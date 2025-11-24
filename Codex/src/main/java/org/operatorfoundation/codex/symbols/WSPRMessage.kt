@@ -161,4 +161,12 @@ class WSPRMessage(
 
         return result
     }
+
+    fun extractValues(): Triple<String, String, Int>
+    {
+        val callsign = "Q${callsign1.value}${callsign2.value}${callsign3.value}${callsign4.value}${callsign5.value}${callsign6.value}"
+        val grid = "${grid1.value}${grid2.value}${grid3.value}${grid4.value}"
+        val power = power.value
+        return Triple(callsign, grid, power)
+    }
 }
