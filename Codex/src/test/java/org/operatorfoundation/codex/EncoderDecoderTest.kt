@@ -8,38 +8,6 @@ import java.math.BigInteger
 class SymbolTest {
 
     @Test
-    fun testBinaryEncoding() {
-        // Test encoding 0
-        val encoded0 = Binary.encode(BigInteger.ZERO)
-        assertEquals(0, encoded0.value)
-
-        // Test encoding 1
-        val encoded1 = Binary.encode(BigInteger.ONE)
-        assertEquals(1, encoded1.value)
-
-        // Test invalid value
-        assertThrows(IllegalArgumentException::class.java) {
-            Binary.encode(BigInteger.valueOf(2))
-        }
-    }
-
-    @Test
-    fun testBinaryDecoding() {
-        val binary0 = Binary.encode(BigInteger.ZERO)
-        val binary1 = Binary.encode(BigInteger.ONE)
-
-        assertEquals(BigInteger.ZERO, binary0.decode())
-        assertEquals(BigInteger.ONE, binary1.decode())
-    }
-
-    @Test
-    fun testBinaryRoundTrip() {
-        val encoded = Binary.encode(BigInteger.ONE)
-        val decoded = encoded.decode()
-        assertEquals(BigInteger.ONE, decoded)
-    }
-
-    @Test
     fun testByteEncoding() {
         // Test various byte values
         val testValues = listOf(0, 1, 127, 128, 255)
@@ -291,29 +259,6 @@ class SymbolTest {
     }
 
     @Test
-    fun testTrinaryEncoding() {
-        // Test 0, 1, 2
-        (0..2).forEach { value ->
-            val encoded = Trinary.encode(BigInteger.valueOf(value.toLong()))
-            assertEquals(value, encoded.value)
-        }
-
-        // Test invalid value
-        assertThrows(IllegalArgumentException::class.java) {
-            Trinary.encode(BigInteger.valueOf(3))
-        }
-    }
-
-    @Test
-    fun testTrinaryDecoding() {
-        (0..2).forEach { value ->
-            val encoded = Trinary.encode(BigInteger.valueOf(value.toLong()))
-            val decoded = encoded.decode()
-            assertEquals(BigInteger.valueOf(value.toLong()), decoded)
-        }
-    }
-
-    @Test
     fun testWSPRMessageRoundTrip() {
         val testValues = listOf(
             BigInteger.ZERO,
@@ -418,7 +363,6 @@ class SymbolTest {
 
     @Test
     fun testAllSymbolSizes() {
-        assertEquals(2, Binary.size().toInt())
         assertEquals(256, Octet.size().toInt())
         assertEquals(37, CallAny.size().toInt())
         assertEquals(26, CallLetter.size().toInt())
@@ -429,7 +373,6 @@ class SymbolTest {
         assertEquals(10, GridNumber.size().toInt())
         assertEquals(19, Power.size().toInt())
         assertEquals(0, Required('Q').size().toInt())
-        assertEquals(3, Trinary.size().toInt())
     }
 
     @Test
@@ -862,34 +805,5 @@ class SymbolTest {
 
         assertEquals(minTwoMessages, decoded2, "Min two message value should round-trip")
     }
-
-//    @Test
-//    fun testRequiredSymbolValidation()
-//    {
-//        // Test that Required symbol validates correctly
-//        val decoder = Decoder(listOf(Required('X'.code.toByte()), Number()))
-//
-//        // Should decode successfully with 'X'
-//        val validInput = listOf("X".toByteArray(), "5".toByteArray())
-//        val result = decoder.decode(validInput)
-//        assertEquals(BigInteger.valueOf(5), result)
-//
-//        // Should throw with wrong required character
-//        val invalidInput = listOf("Y".toByteArray(), "5".toByteArray())
-//        assertThrows(IllegalArgumentException::class.java) {
-//            decoder.decode(invalidInput)
-//        }
-//    }
-//
-//    @Test
-//    fun testEncoderOverflow()
-//    {
-//        // Test that encoder throws when value is too large
-//        val encoder = Encoder(listOf(Binary(), Binary())) // Max value = 3
-//
-//        assertThrows(Exception::class.java) {
-//            encoder.encode(BigInteger.valueOf(4))
-//        }
-//    }
 
 }
