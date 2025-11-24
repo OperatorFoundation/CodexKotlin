@@ -10,7 +10,6 @@ class WSPRMessage(
     val callsign3: CallLetterNumber,
     val callsign4: CallLetterNumber,
     val callsign5: CallLetterNumber,
-    val callsign6: CallLetterNumber,
     val grid1: GridLetter,
     val grid2: GridLetter,
     val grid3: GridNumber,
@@ -19,7 +18,7 @@ class WSPRMessage(
 ) : Symbol {
     companion object : SymbolFactory<WSPRMessage> {
         override fun size(): BigInteger {
-            val callsignCapacity = BigInteger.valueOf(CallLetterNumber.size().toLong()).pow(6)
+            val callsignCapacity = BigInteger.valueOf(CallLetterNumber.size().toLong()).pow(5)
             val gridLetterCapacity = BigInteger.valueOf(GridLetter.size().toLong()).pow(2)
             val gridNumberCapacity = BigInteger.valueOf(GridNumber.size().toLong()).pow(2)
             val powerCapacity = Power.size()
@@ -63,12 +62,6 @@ class WSPRMessage(
             val grid1 = GridLetter.encode(value)
             remaining = remaining.divide(size)
 
-            // callsign6
-            size = CallLetterNumber.size()
-            value = remaining.mod(size)
-            val callsign6 = CallLetterNumber.encode(value)
-            remaining = remaining.divide(size)
-
             // callsign5
             size = CallLetterNumber.size()
             value = remaining.mod(size)
@@ -103,12 +96,12 @@ class WSPRMessage(
 
             val required = Required('Q')
 
-            return WSPRMessage(required, callsign1, callsign2, callsign3, callsign4, callsign5, callsign6, grid1, grid2, grid3, grid4, power)
+            return WSPRMessage(required, callsign1, callsign2, callsign3, callsign4, callsign5, grid1, grid2, grid3, grid4, power)
         }
     }
 
     override fun toString(): String = "WSPRMessage(${prefix.value}, " +
-            "${callsign1.value}${callsign2.value}${callsign3.value}${callsign4.value}${callsign5.value}${callsign6.value}, " +
+            "${callsign1.value}${callsign2.value}${callsign3.value}${callsign4.value}${callsign5.value}, " +
             "${grid1.value}${grid2.value}${grid3.value}${grid4.value}, ${power.value})"
 
     override fun decode(): BigInteger {
@@ -133,10 +126,6 @@ class WSPRMessage(
 
         size = CallLetterNumber.size()
         decoded = callsign5.decode()
-        result = result.multiply(size).add(decoded)
-
-        size = CallLetterNumber.size()
-        decoded = callsign6.decode()
         result = result.multiply(size).add(decoded)
 
         size = GridLetter.size()
@@ -164,7 +153,7 @@ class WSPRMessage(
 
     fun extractValues(): Triple<String, String, Int>
     {
-        val callsign = "Q${callsign1.value}${callsign2.value}${callsign3.value}${callsign4.value}${callsign5.value}${callsign6.value}"
+        val callsign = "Q${callsign1.value}${callsign2.value}${callsign3.value}${callsign4.value}${callsign5.value}"
         val grid = "${grid1.value}${grid2.value}${grid3.value}${grid4.value}"
         val power = power.value
         return Triple(callsign, grid, power)

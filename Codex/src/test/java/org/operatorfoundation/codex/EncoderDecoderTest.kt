@@ -447,7 +447,7 @@ class SymbolTest {
 
                 println("  Encoded successfully")
                 println("  Prefix: ${encoded.prefix.value}")
-                println("  Callsign: ${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}${encoded.callsign6.value}")
+                println("  Callsign: ${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}")
                 println("  Grid: ${encoded.grid1.value}${encoded.grid2.value}${encoded.grid3.value}${encoded.grid4.value}")
                 println("  Power: ${encoded.power.value}")
 
@@ -474,7 +474,7 @@ class SymbolTest {
         val encoded = WSPRMessage.encode(BigInteger.ZERO)
 
         println("Prefix: ${encoded.prefix.value}")
-        println("Callsign: ${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}${encoded.callsign6.value}")
+        println("Callsign: ${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}")
         println("Grid: ${encoded.grid1.value}${encoded.grid2.value}${encoded.grid3.value}${encoded.grid4.value}")
         println("Power: ${encoded.power.value}")
 
@@ -491,7 +491,7 @@ class SymbolTest {
         val encoded = WSPRMessage.encode(BigInteger.ONE)
 
         println("Prefix: ${encoded.prefix.value}")
-        println("Callsign: ${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}${encoded.callsign6.value}")
+        println("Callsign: ${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}")
         println("Grid: ${encoded.grid1.value}${encoded.grid2.value}${encoded.grid3.value}${encoded.grid4.value}")
         println("Power: ${encoded.power.value}")
 
@@ -634,7 +634,7 @@ class SymbolTest {
             val encoded = WSPRMessage.encode(value)
             println("  Encoded successfully")
             println("  Prefix: ${encoded.prefix.value}")
-            println("  Callsign: ${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}${encoded.callsign6.value}")
+            println("  Callsign: ${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}")
             println("  Grid: ${encoded.grid1.value}${encoded.grid2.value}${encoded.grid3.value}${encoded.grid4.value}")
             println("  Power: ${encoded.power.value}")
 
