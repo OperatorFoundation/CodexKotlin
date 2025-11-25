@@ -806,4 +806,289 @@ class SymbolTest {
         assertEquals(minTwoMessages, decoded2, "Min two message value should round-trip")
     }
 
+    @Test
+    fun testWSPRMessageFieldsRoundTrip()
+    {
+        println("\n=== Testing WSPRMessage toWSPRFields/fromWSPRFields Round Trip ===")
+
+        val testValues = listOf(
+            BigInteger.ZERO,
+            BigInteger.ONE,
+            BigInteger.valueOf(100),
+            BigInteger.valueOf(123456789),
+            BigInteger.valueOf(1000000000)
+        )
+
+        testValues.forEach { value ->
+            println("\nTesting value: $value")
+
+            // Encode to WSPRMessage
+            val encoded = WSPRMessage.encode(value)
+            println("  Encoded: $encoded")
+
+            // Convert to WSPR fields
+            val fields = encoded.toWSPRFields()
+            println("  Fields: callsign=${fields.first}, grid=${fields.second}, power=${fields.third}")
+
+            // Reconstruct from fields
+            val reconstructed = WSPRMessage.fromWSPRFields(fields.first, fields.second, fields.third)
+            println("  Reconstructed: $reconstructed")
+
+            // Decode back to value
+            val decoded = reconstructed.decode()
+            println("  Decoded: $decoded")
+
+            assertEquals(value, decoded, "Round-trip failed for value $value")
+            println("  ✓ Round-trip successful")
+        }
+    }
+
+    @Test
+    fun testWSPRMessageFieldsMatchOriginal()
+    {
+        println("\n=== Testing that toWSPRFields produces correct format ===")
+
+        val value = BigInteger.valueOf(12345)
+        val message = WSPRMessage.encode(value)
+        val fields = message.toWSPRFields()
+
+        // Callsign should be 6 characters starting with Q
+        assertEquals(6, fields.first.length, "Callsign should be 6 characters")
+        assertTrue(fields.first.startsWith("Q"), "Callsign should start with Q")
+
+        // Grid should be 4 characters
+        assertEquals(4, fields.second.length, "Grid should be 4 characters")
+
+        // Power should be a valid WSPR power level
+        val validPowers = setOf(0, 3, 7, 10, 13, 17, 20, 23, 27, 30, 33, 37, 40, 43, 47, 50, 53, 57, 60)
+        assertTrue(validPowers.contains(fields.third), "Power should be valid WSPR level")
+
+        println("Callsign: ${fields.first}")
+        println("Grid: ${fields.second}")
+        println("Power: ${fields.third} dBm")
+        println("✓ All fields have correct format")
+    }
+
+    @Test
+    fun testWSPRMessageSequenceFieldsRoundTrip()
+    {
+        println("\n=== Testing WSPRMessageSequence toWSPRFields/fromWSPRFields Round Trip ===")
+
+        val testValues = listOf(
+            BigInteger.ZERO,
+            BigInteger.ONE,
+            BigInteger.valueOf(123456789),
+            WSPRMessage.size().subtract(BigInteger.ONE), // Max single message
+            WSPRMessage.size(), // Min two messages
+            WSPRMessage.size().multiply(BigInteger.valueOf(1000)) // Definitely multiple messages
+        )
+
+        testValues.forEach { value ->
+            println("\nTesting value: $value")
+
+            // Encode to sequence
+            val encoded = WSPRMessageSequence.encode(value)
+            println("  Encoded into ${encoded.messages.size} message(s)")
+
+            // Convert to fields
+            val fieldsList = encoded.toWSPRFields()
+            println("  Fields: ${fieldsList.size} triple(s)")
+            fieldsList.forEachIndexed { i, f ->
+                println("    [$i] ${f.first}, ${f.second}, ${f.third}")
+            }
+
+            // Reconstruct from fields
+            val reconstructed = WSPRMessageSequence.fromWSPRFields(fieldsList)
+            println("  Reconstructed: ${reconstructed.messages.size} message(s)")
+
+            // Decode back to value
+            val decoded = reconstructed.decode()
+            println("  Decoded: $decoded")
+
+            assertEquals(value, decoded, "Round-trip failed for value $value")
+            println("  ✓ Round-trip successful")
+        }
+    }
+
+    @Test
+    fun testWSPRMessageSequenceFromMessagesRoundTrip()
+    {
+        println("\n=== Testing WSPRMessageSequence fromMessages Round Trip ===")
+
+        val value = BigInteger.valueOf(999999999999L)
+        val encoded = WSPRMessageSequence.encode(value)
+
+        // Get individual messages
+        val messages = encoded.messages
+
+        // Reconstruct using fromMessages
+        val reconstructed = WSPRMessageSequence.fromMessages(messages)
+        val decoded = reconstructed.decode()
+
+        assertEquals(value, decoded)
+        println("✓ fromMessages round-trip successful")
+    }
+
+    @Test
+    fun testWSPRMessageSequenceDecodeToBytes()
+    {
+        println("\n=== Testing WSPRMessageSequence decodeToBytes ===")
+
+        // Create a known byte array
+        val originalBytes = byteArrayOf(0x01, 0x02, 0x03, 0x04, 0x05)
+        val bigInt = BigInteger(1, originalBytes)
+
+        // Encode to sequence
+        val encoded = WSPRMessageSequence.encode(bigInt)
+
+        // Decode to bytes
+        val decodedBytes = encoded.decodeToBytes()
+
+        // Compare (may have leading zero handling differences)
+        val decodedBigInt = BigInteger(1, decodedBytes)
+        assertEquals(bigInt, decodedBigInt)
+
+        println("Original bytes: ${originalBytes.joinToString { "%02x".format(it) }}")
+        println("Decoded bytes: ${decodedBytes.joinToString { "%02x".format(it) }}")
+        println("✓ decodeToBytes produces equivalent value")
+    }
+
+    @Test
+    fun testCallLetterFromChar() {
+        println("\n=== Testing CallLetter.fromChar ===")
+
+        ('A'..'Z').forEach { char ->
+            val symbol = CallLetter.fromChar(char)
+            assertEquals(char, symbol.value)
+        }
+        println("✓ All letters A-Z work")
+
+        // Test lowercase
+        val lowercase = CallLetter.fromChar('a')
+        assertEquals('A', lowercase.value)
+        println("✓ Lowercase converted to uppercase")
+
+        assertThrows(IllegalArgumentException::class.java) {
+            CallLetter.fromChar('0')
+        }
+        println("✓ Rejects digits")
+    }
+
+    @Test
+    fun testCallNumberFromChar() {
+        println("\n=== Testing CallNumber.fromChar ===")
+
+        ('0'..'9').forEach { char ->
+            val symbol = CallNumber.fromChar(char)
+            assertEquals(char, symbol.value)
+        }
+        println("✓ All digits 0-9 work")
+
+        assertThrows(IllegalArgumentException::class.java) {
+            CallNumber.fromChar('A')
+        }
+        println("✓ Rejects letters")
+    }
+
+    @Test
+    fun testGridLetterFromChar() {
+        println("\n=== Testing GridLetter.fromChar ===")
+
+        ('A'..'R').forEach { char ->
+            val symbol = GridLetter.fromChar(char)
+            assertEquals(char, symbol.value)
+        }
+        println("✓ All letters A-R work")
+
+        assertThrows(IllegalArgumentException::class.java) {
+            GridLetter.fromChar('S') // Grid letters only go to R
+        }
+        println("✓ Rejects letters beyond R")
+    }
+
+    @Test
+    fun testGridNumberFromChar() {
+        println("\n=== Testing GridNumber.fromChar ===")
+
+        ('0'..'9').forEach { char ->
+            val symbol = GridNumber.fromChar(char)
+            assertEquals(char, symbol.value)
+        }
+        println("✓ All digits 0-9 work")
+    }
+
+    @Test
+    fun testPowerFromDbm() {
+        println("\n=== Testing Power.fromDbm ===")
+
+        val validPowers = listOf(0, 3, 7, 10, 13, 17, 20, 23, 27, 30, 33, 37, 40, 43, 47, 50, 53, 57, 60)
+
+        validPowers.forEach { dbm ->
+            val symbol = Power.fromDbm(dbm)
+            assertEquals(dbm, symbol.value)
+        }
+        println("✓ All valid power levels work")
+
+        assertThrows(IllegalArgumentException::class.java) {
+            Power.fromDbm(25) // Not a valid WSPR power
+        }
+        println("✓ Rejects invalid power level")
+    }
+
+    @Test
+    fun testWSPRMessageSequenceEmptyListValidation() {
+        println("\n=== Testing fromWSPRFields empty list validation ===")
+
+        assertThrows(IllegalArgumentException::class.java) {
+            WSPRMessageSequence.fromWSPRFields(emptyList())
+        }
+        println("✓ Rejects empty field list")
+
+        assertThrows(IllegalArgumentException::class.java) {
+            WSPRMessageSequence.fromMessages(emptyList())
+        }
+        println("✓ Rejects empty message list")
+    }
+
+    @Test
+    fun testFullEncodeDecodeWithFieldsIntegration() {
+        println("\n=== Full Integration Test: encode → toWSPRFields → fromWSPRFields → decode ===")
+
+        // Simulate a large encrypted message (like what Nahoft would produce)
+        val simulatedEncryptedData = ByteArray(64) { it.toByte() }
+        val numericValue = BigInteger(1, simulatedEncryptedData)
+
+        println("Original data: ${simulatedEncryptedData.size} bytes")
+        println("As BigInteger: $numericValue")
+
+        // Encode path (sender side)
+        val encoded = WSPRMessageSequence.encode(numericValue)
+        val fieldsForTransmission = encoded.toWSPRFields()
+
+        println("Encoded into ${fieldsForTransmission.size} WSPR messages")
+        fieldsForTransmission.take(3).forEachIndexed { i, f ->
+            println("  Message $i: ${f.first} ${f.second} ${f.third}dBm")
+        }
+        if (fieldsForTransmission.size > 3) {
+            println("  ... and ${fieldsForTransmission.size - 3} more")
+        }
+
+        // Decode path (receiver side)
+        val reconstructed = WSPRMessageSequence.fromWSPRFields(fieldsForTransmission)
+        val decoded = reconstructed.decode()
+        val recoveredBytes = reconstructed.decodeToBytes()
+
+        println("Decoded BigInteger: $decoded")
+        println("Recovered data: ${recoveredBytes.size} bytes")
+
+        assertEquals(numericValue, decoded, "BigInteger should match")
+
+        // Compare bytes (accounting for potential sign byte differences)
+        val originalBigInt = BigInteger(1, simulatedEncryptedData)
+        val recoveredBigInt = BigInteger(1, recoveredBytes)
+        assertEquals(originalBigInt, recoveredBigInt, "Byte data should be equivalent")
+
+        println("✓ Full integration test passed")
+    }
+
 }

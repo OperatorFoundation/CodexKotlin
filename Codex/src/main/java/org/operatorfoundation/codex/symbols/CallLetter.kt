@@ -26,6 +26,20 @@ class CallLetter(val value: Char) : Symbol {
                 ?: throw IllegalArgumentException("Unknown value $numericValue for CallLetter")
             return CallLetter(char)
         }
+
+        /**
+         * Creates a CallLetter from a character value.
+         *
+         * @param char The character (A-Z)
+         * @return CallLetter instance
+         * @throws IllegalArgumentException if char is not a valid CallLetter
+         */
+        fun fromChar(char: Char): CallLetter
+        {
+            val upperChar = char.uppercaseChar()
+            if (charToValue.containsKey(upperChar)) return CallLetter(upperChar)
+            throw IllegalArgumentException("Invalid CallLetter character: $char")
+        }
     }
 
     override fun toString(): String = "CallLetter($value)"

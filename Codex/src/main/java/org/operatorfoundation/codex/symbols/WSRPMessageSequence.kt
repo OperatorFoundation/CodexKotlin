@@ -26,6 +26,40 @@ class WSPRMessageSequence(val messages: List<WSPRMessage>) : Symbol {
 
             return WSPRMessageSequence(messages)
         }
+
+        /**
+         * Creates a WSPRMessageSequence from WSPR transmission fields.
+         *
+         * This reconstructs a message sequence from a list of (callsign, grid, power) tuples
+         * received from WSPR decodes. The messages must be provided in transmission order
+         * (least significant first).
+         *
+         * @param fields List of triples containing (callsign, gridSquare, powerDbm)
+         * @return WSPRMessageSequence instance
+         * @throws IllegalArgumentException if any field is invalid
+         */
+        fun fromWSPRFields(fields: List<Triple<String, String, Int>>): WSPRMessageSequence
+        {
+            require(fields.isNotEmpty()) { "Cannot create WSPRMessageSequence from empty list" }
+
+            val messages = fields.map { (callsign, grid, power) ->
+                WSPRMessage.fromWSPRFields(callsign, grid, power)
+            }
+
+            return WSPRMessageSequence(messages)
+        }
+
+        /**
+         * Creates a WSPRMessageSequence from a list of WSPRMessage objects.
+         *
+         * @param messages List of WSPRMessage objects in transmission order
+         * @return WSPRMessageSequence instance
+         */
+        fun fromMessages(messages: List<WSPRMessage>): WSPRMessageSequence
+        {
+            require(messages.isNotEmpty()) { "Cannot create WSPRMessageSequence from empty list" }
+            return WSPRMessageSequence(messages)
+        }
     }
 
     override fun toString(): String = "WSPRMessageSequence(${messages.size})"
@@ -45,8 +79,21 @@ class WSPRMessageSequence(val messages: List<WSPRMessage>) : Symbol {
         return result
     }
 
-    fun extractValues(): List<Triple<String, String, Int>>
+    /**
+     * Decodes the message sequence to a byte array.
+     *
+     * This is a convenience method for decoding encrypted message data.
+     * The BigInteger is converted to a byte array suitable for decryption.
+     *
+     * @return ByteArray containing the decoded data
+     */
+    fun decodeToBytes(): ByteArray {
+        val bigInt = decode()
+        return bigInt.toByteArray()
+    }
+
+    fun toWSPRFields(): List<Triple<String, String, Int>>
     {
-        return messages.map { it.extractValues() }
+        return messages.map { it.toWSPRFields() }
     }
 }
