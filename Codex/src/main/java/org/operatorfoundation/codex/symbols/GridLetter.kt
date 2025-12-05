@@ -25,6 +25,20 @@ class GridLetter(val value: Char) : Symbol {
             }
             throw IllegalArgumentException("Unknown value $numericValue for GridLetter")
         }
+
+        /**
+         * Creates a GridLetter from a character value.
+         *
+         * @param char The character (A-R)
+         * @return GridLetter instance
+         * @throws IllegalArgumentException if char is not a valid GridLetter
+         */
+        fun fromChar(char: Char): GridLetter
+        {
+            val upperChar = char.uppercaseChar()
+            if (charToValue.containsKey(upperChar)) return GridLetter(upperChar)
+            throw IllegalArgumentException("Invalid GridLetter character: $char")
+        }
     }
     
     override fun toString(): String = "GridLetter($value)"

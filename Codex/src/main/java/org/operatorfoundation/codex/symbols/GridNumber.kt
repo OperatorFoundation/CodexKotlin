@@ -23,6 +23,19 @@ class GridNumber(val value: Char) : Symbol {
             }
             throw IllegalArgumentException("Unknown value $numericValue for Number")
         }
+
+        /**
+         * Creates a GridNumber from a character value.
+         *
+         * @param char The character (0-9)
+         * @return GridNumber instance
+         * @throws IllegalArgumentException if char is not a valid digit
+         */
+        fun fromChar(char: Char): GridNumber
+        {
+            if (charToValue.containsKey(char)) return GridNumber(char)
+            throw IllegalArgumentException("Invalid GridNumber character: $char")
+        }
     }
 
     override fun toString(): String = "Number($value)"

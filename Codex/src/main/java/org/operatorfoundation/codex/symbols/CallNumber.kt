@@ -23,6 +23,19 @@ class CallNumber(val value: Char) : Symbol {
             }
             throw IllegalArgumentException("Unknown value $numericValue for Number")
         }
+
+        /**
+         * Creates a CallNumber from a character value.
+         *
+         * @param char The character (0-9)
+         * @return CallNumber instance
+         * @throws IllegalArgumentException if char is not a valid digit
+         */
+        fun fromChar(char: Char): CallNumber
+        {
+            if (charToValue.containsKey(char)) return CallNumber(char)
+            throw IllegalArgumentException("Invalid CallNumber character: $char")
+        }
     }
 
     override fun toString(): String = "Number($value)"

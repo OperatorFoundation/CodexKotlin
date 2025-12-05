@@ -13,12 +13,30 @@ class Power(val value: Int) : Symbol {
         )
         private val powerToIndex = indexToPower.map { (k, v) -> v to k }.toMap()
 
+        /** Set of valid WSPR power levels in dBm */
+        val validPowerLevels: Set<Int> = powerToIndex.keys
+
         override fun size(): BigInteger = 19.toBigInteger()
 
         override fun encode(numericValue: BigInteger): Power {
             val powerValue = indexToPower[numericValue.toInt()]
                 ?: throw IllegalArgumentException("Invalid index: $numericValue")
             return Power(powerValue)
+        }
+
+        /**
+         * Creates a Power from a dBm value.
+         *
+         * @param dbm The power level in dBm (must be a valid WSPR power level)
+         * @return Power instance
+         * @throws IllegalArgumentException if dbm is not a valid WSPR power level
+         */
+        fun fromDbm(dbm: Int): Power
+        {
+            if (powerToIndex.containsKey(dbm)) return Power(dbm)
+            throw IllegalArgumentException(
+                "Invalid power level: $dbm dBm. Valid levels: ${validPowerLevels.sorted()}"
+            )
         }
     }
 

@@ -99,6 +99,61 @@ class WSPRMessage(
 
             return WSPRMessage(required, callsign1, callsign2, callsign3, callsign4, callsign5, grid1, grid2, grid3, grid4, power)
         }
+
+        /**
+         * Creates a WSPRMessage from WSPR transmission fields.
+         *
+         * This is the inverse of toWSPRFields() - it reconstructs a WSPRMessage
+         * from the callsign, grid square, and power level received from a WSPR decode.
+         *
+         * @param callsign The 6-character callsign (e.g., "QA0BCD") - must start with 'Q'
+         * @param gridSquare The 4-character grid square (e.g., "FN31")
+         * @param powerDbm The power level in dBm (must be a valid WSPR power level)
+         * @return WSPRMessage instance
+         * @throws IllegalArgumentException if any parameter is invalid
+         */
+        fun fromWSPRFields(callsign: String, gridSquare: String, powerDbm: Int): WSPRMessage
+        {
+            // Validate and parse callsign
+            val trimmedCallsign = callsign.trim().uppercase()
+
+            require(trimmedCallsign.length == 6) {
+                "Callsign must be exactly 6 characters, got: '$callsign' (${trimmedCallsign.length})"
+            }
+            require(trimmedCallsign[0] == 'Q') {
+                "Encoded WSPR callsign must start with 'Q', got: '$callsign'"
+            }
+
+            // Validate and parse grid square
+            val trimmedGrid = gridSquare.trim().uppercase()
+            require(trimmedGrid.length == 4) {
+                "Grid square must be exactly 4 characters, got: '$gridSquare' (${trimmedGrid.length})"
+            }
+
+            // Build the WSPRMessage from parsed values
+            val prefix = Required('Q')
+            val callsign1 = CallLetter.fromChar(trimmedCallsign[1])
+            val callsign2 = CallNumber.fromChar(trimmedCallsign[2])
+            val callsign3 = CallLetter.fromChar(trimmedCallsign[3])
+            val callsign4 = CallLetter.fromChar(trimmedCallsign[4])
+            val callsign5 = CallLetter.fromChar(trimmedCallsign[5])
+
+            val grid1 = GridLetter.fromChar(trimmedGrid[0])
+            val grid2 = GridLetter.fromChar(trimmedGrid[1])
+            val grid3 = GridNumber.fromChar(trimmedGrid[2])
+            val grid4 = GridNumber.fromChar(trimmedGrid[3])
+
+            val power = Power.fromDbm(powerDbm)
+
+            return WSPRMessage(
+                prefix, callsign1, callsign2, callsign3, callsign4, callsign5,
+                grid1, grid2, grid3, grid4, power
+            )
+        }
+
+        fun isEncodedMessage(callsign: String): Boolean {
+            return callsign.trim().uppercase().startsWith("Q")
+        }
     }
 
     override fun toString(): String = "WSPRMessage(${prefix.value}, " +
@@ -152,7 +207,7 @@ class WSPRMessage(
         return result
     }
 
-    fun extractValues(): Triple<String, String, Int> {
+    fun toWSPRFields(): Triple<String, String, Int> {
         val callsign = "Q${callsign1.value}${callsign2.value}${callsign3.value}${callsign4.value}${callsign5.value}"
         val grid = "${grid1.value}${grid2.value}${grid3.value}${grid4.value}"
         val power = power.value
