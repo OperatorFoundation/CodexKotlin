@@ -34,4 +34,9 @@ class Octet(val value: Int) : Symbol {
     override fun decode(): BigInteger {
         return value.toBigInteger()
     }
+
+    fun toByte(): Byte
+    {
+        return value.toUByte().toByte()
+    }
 }

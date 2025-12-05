@@ -805,5 +805,4 @@ class SymbolTest {
 
         assertEquals(minTwoMessages, decoded2, "Min two message value should round-trip")
     }
-
 }
