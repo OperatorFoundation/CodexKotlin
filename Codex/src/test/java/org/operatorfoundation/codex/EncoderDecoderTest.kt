@@ -269,10 +269,6 @@ class SymbolTest {
 
         testValues.forEach { value ->
             val encoded = WSPRMessage.encode(value)
-
-            // Verify it's a valid WSPR message (starts with Q)
-            assertEquals('Q', encoded.prefix.value)
-
             val decoded = encoded.decode()
             assertEquals(value, decoded, "Round-trip failed for value $value")
         }
@@ -372,11 +368,11 @@ class SymbolTest {
         assertEquals(10, CallNumber.size().toInt())
         assertEquals(10, GridNumber.size().toInt())
         assertEquals(19, Power.size().toInt())
-        assertEquals(0, Required('Q').size().toInt())
     }
 
     @Test
-    fun testWSPRMessageBasicEncoding() {
+    fun testWSPRMessageBasicEncoding()
+    {
         // Test encoding small values
         println("\n=== Testing WSPRMessage Basic Encoding ===")
 
@@ -385,12 +381,12 @@ class SymbolTest {
         testValues.forEach { value ->
             println("\nTesting value: $value")
 
-            try {
+            try
+            {
                 val encoded = WSPRMessage.encode(BigInteger.valueOf(value.toLong()))
 
                 println("  Encoded successfully")
-                println("  Prefix: ${encoded.prefix.value}")
-                println("  Callsign: ${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}")
+                println("  Callsign: ${encoded.callsign0.value}${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}")
                 println("  Grid: ${encoded.grid1.value}${encoded.grid2.value}${encoded.grid3.value}${encoded.grid4.value}")
                 println("  Power: ${encoded.power.value}")
 
@@ -402,7 +398,9 @@ class SymbolTest {
                     "Round-trip failed for value $value")
                 println("  ✓ Round-trip successful")
 
-            } catch (e: Exception) {
+            }
+            catch (e: Exception)
+            {
                 println("  ✗ Error: ${e.message}")
                 e.printStackTrace()
                 throw e
@@ -416,8 +414,7 @@ class SymbolTest {
 
         val encoded = WSPRMessage.encode(BigInteger.ZERO)
 
-        println("Prefix: ${encoded.prefix.value}")
-        println("Callsign: ${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}")
+        println("Callsign: ${encoded.callsign0.value}${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}")
         println("Grid: ${encoded.grid1.value}${encoded.grid2.value}${encoded.grid3.value}${encoded.grid4.value}")
         println("Power: ${encoded.power.value}")
 
@@ -433,8 +430,7 @@ class SymbolTest {
 
         val encoded = WSPRMessage.encode(BigInteger.ONE)
 
-        println("Prefix: ${encoded.prefix.value}")
-        println("Callsign: ${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}")
+        println("Callsign: ${encoded.callsign0.value}${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}")
         println("Grid: ${encoded.grid1.value}${encoded.grid2.value}${encoded.grid3.value}${encoded.grid4.value}")
         println("Power: ${encoded.power.value}")
 
@@ -493,7 +489,7 @@ class SymbolTest {
         try {
             WSPRMessage.encode(size)
             fail("Value at size ($size) should throw exception")
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             println("✓ Value at size correctly throws exception")
         }
     }
@@ -562,22 +558,27 @@ class SymbolTest {
         analyzeEncoding(firstFailing)
     }
 
-    private fun testValue(value: BigInteger): Boolean {
-        return try {
+    private fun testValue(value: BigInteger): Boolean
+    {
+        return try
+        {
             val encoded = WSPRMessage.encode(value)
             val decoded = encoded.decode()
             decoded == value
-        } catch (e: Exception) {
+        }
+        catch (_: Exception)
+        {
             false
         }
     }
 
-    private fun analyzeEncoding(value: BigInteger) {
-        try {
+    private fun analyzeEncoding(value: BigInteger)
+    {
+        try
+        {
             val encoded = WSPRMessage.encode(value)
             println("  Encoded successfully")
-            println("  Prefix: ${encoded.prefix.value}")
-            println("  Callsign: ${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}")
+            println("  Callsign: ${encoded.callsign0.value}${encoded.callsign1.value}${encoded.callsign2.value}${encoded.callsign3.value}${encoded.callsign4.value}${encoded.callsign5.value}")
             println("  Grid: ${encoded.grid1.value}${encoded.grid2.value}${encoded.grid3.value}${encoded.grid4.value}")
             println("  Power: ${encoded.power.value}")
 
@@ -585,13 +586,16 @@ class SymbolTest {
             println("  Decoded: $decoded")
             println("  Match: ${decoded == value}")
 
-            if (decoded != value) {
+            if (decoded != value)
+            {
                 println("  ERROR: Mismatch!")
                 println("    Expected: $value")
                 println("    Got:      $decoded")
                 println("    Difference: ${value.subtract(decoded)}")
             }
-        } catch (e: Exception) {
+        }
+        catch (e: Exception)
+        {
             println("  Exception: ${e.message}")
             e.printStackTrace()
         }
@@ -664,7 +668,8 @@ class SymbolTest {
     }
 
     @Test
-    fun testWSPRMessageSequenceEncodingStep() {
+    fun testWSPRMessageSequenceEncodingStep()
+    {
         println("\n=== Step-by-step Encoding ===")
 
         val messageSize = WSPRMessage.size()
@@ -688,10 +693,13 @@ class SymbolTest {
             println("    value (mod messageSize): $value")
             println("    value < messageSize? ${value < messageSize}")
 
-            try {
-                val message = WSPRMessage.encode(value)
+            try
+            {
+                WSPRMessage.encode(value)
                 println("    ✓ Encoded message successfully")
-            } catch (e: Exception) {
+            }
+            catch (e: Exception)
+            {
                 println("    ✗ Failed to encode: ${e.message}")
             }
 
@@ -852,9 +860,14 @@ class SymbolTest {
         val message = WSPRMessage.encode(value)
         val fields = message.toWSPRFields()
 
-        // Callsign should be 6 characters starting with Q
+        // Callsign should be 6 characters, format: Letter-Letter-Digit-Letter-Letter-Letter
         assertEquals(6, fields.first.length, "Callsign should be 6 characters")
-        assertTrue(fields.first.startsWith("Q"), "Callsign should start with Q")
+        assertTrue(fields.first[0].isLetter(), "Position 0 should be a letter")
+        assertTrue(fields.first[1].isLetter(), "Position 1 should be a letter")
+        assertTrue(fields.first[2].isDigit(), "Position 2 should be a digit")
+        assertTrue(fields.first[3].isLetter(), "Position 3 should be a letter")
+        assertTrue(fields.first[4].isLetter(), "Position 4 should be a letter")
+        assertTrue(fields.first[5].isLetter(), "Position 5 should be a letter")
 
         // Grid should be 4 characters
         assertEquals(4, fields.second.length, "Grid should be 4 characters")
