@@ -47,9 +47,7 @@ fun encodeDataToWSPRMessages(data: ByteArray): List<WSPRMessageFields>?
             try
             {
                 val encoded = WSPRMessageSequence.encode(numericValue)
-                val fields = encoded.toWSPRFields().map { (callsign, gridSquare, powerDbm) ->
-                    WSPRMessageFields(callsign, gridSquare, powerDbm)
-                }
+                val fields = encoded.toWSPRFields()
 
                 Timber.d("Encoded ${data.size} bytes into ${fields.size} WSPR message(s)")
                 return fields

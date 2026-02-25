@@ -1,6 +1,7 @@
 package org.operatorfoundation.codex.symbols
 import java.math.BigInteger
 import org.operatorfoundation.codex.*
+import org.operatorfoundation.Codex.WSPRMessageFields
 
 /**
  * A sequence of WSPR messages that can encode arbitrarily large integers
@@ -38,14 +39,12 @@ class WSPRMessageSequence(val messages: List<WSPRMessage>) : Symbol {
          * @return WSPRMessageSequence instance
          * @throws IllegalArgumentException if any field is invalid
          */
-        fun fromWSPRFields(fields: List<Triple<String, String, Int>>): WSPRMessageSequence
+        fun fromWSPRFields(fields: List<WSPRMessageFields>): WSPRMessageSequence
         {
             require(fields.isNotEmpty()) { "Cannot create WSPRMessageSequence from empty list" }
-
-            val messages = fields.map { (callsign, grid, power) ->
-                WSPRMessage.fromWSPRFields(callsign, grid, power)
+            val messages = fields.map { msg ->
+                WSPRMessage.fromWSPRFields(msg.callsign, msg.gridSquare, msg.powerDbm)
             }
-
             return WSPRMessageSequence(messages)
         }
 
@@ -92,8 +91,5 @@ class WSPRMessageSequence(val messages: List<WSPRMessage>) : Symbol {
         return bigInt.toByteArray()
     }
 
-    fun toWSPRFields(): List<Triple<String, String, Int>>
-    {
-        return messages.map { it.toWSPRFields() }
-    }
+    fun toWSPRFields(): List<WSPRMessageFields> = messages.map { it.toWSPRFields() }
 }

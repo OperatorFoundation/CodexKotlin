@@ -1,4 +1,5 @@
 package org.operatorfoundation.codex.symbols
+import org.operatorfoundation.Codex.WSPRMessageFields
 import java.math.BigInteger
 import org.operatorfoundation.codex.*
 
@@ -218,11 +219,10 @@ class WSPRMessage(
         return result
     }
 
-    fun toWSPRFields(): Triple<String, String, Int>
+    fun toWSPRFields(): WSPRMessageFields
     {
         val callsign = "${callsign0.value}${callsign1.value}${callsign2.value}${callsign3.value}${callsign4.value}${callsign5.value}"
         val grid = "${grid1.value}${grid2.value}${grid3.value}${grid4.value}"
-        val power = power.value
-        return Triple(callsign, grid, power)
+        return WSPRMessageFields(callsign, grid, power.value)
     }
 }
