@@ -16,3 +16,4 @@ local.properties
 /.idea
 /.kotlin/errors
 *.log
+gradle/gradle-daemon-jvm.properties
