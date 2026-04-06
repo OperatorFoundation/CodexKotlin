@@ -1,7 +1,7 @@
 package org.operatorfoundation.codex.symbols
 import java.math.BigInteger
 import org.operatorfoundation.codex.*
-import org.operatorfoundation.Codex.WSPRMessageFields
+import org.operatorfoundation.codex.WSPRMessageFields
 
 /**
  * A sequence of WSPR messages that can encode arbitrarily large integers

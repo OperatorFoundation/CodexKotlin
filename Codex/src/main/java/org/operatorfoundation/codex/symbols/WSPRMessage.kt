@@ -1,5 +1,5 @@
 package org.operatorfoundation.codex.symbols
-import org.operatorfoundation.Codex.WSPRMessageFields
+import org.operatorfoundation.codex.WSPRMessageFields
 import java.math.BigInteger
 import org.operatorfoundation.codex.*
 

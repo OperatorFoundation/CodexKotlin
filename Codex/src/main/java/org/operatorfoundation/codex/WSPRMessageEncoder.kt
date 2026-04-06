@@ -1,4 +1,4 @@
-package org.operatorfoundation.Codex
+package org.operatorfoundation.codex
 
 import org.operatorfoundation.codex.symbols.WSPRMessage
 import org.operatorfoundation.codex.symbols.WSPRMessageSequence

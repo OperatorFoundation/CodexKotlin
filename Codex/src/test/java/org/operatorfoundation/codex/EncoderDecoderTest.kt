@@ -836,10 +836,10 @@ class SymbolTest {
 
             // Convert to WSPR fields
             val fields = encoded.toWSPRFields()
-            println("  Fields: callsign=${fields.first}, grid=${fields.second}, power=${fields.third}")
+            println("  Fields: callsign=${fields.callsign}, grid=${fields.gridSquare}, power=${fields.powerDbm}")
 
             // Reconstruct from fields
-            val reconstructed = WSPRMessage.fromWSPRFields(fields.first, fields.second, fields.third)
+            val reconstructed = WSPRMessage.fromWSPRFields(fields.callsign, fields.gridSquare, fields.powerDbm)
             println("  Reconstructed: $reconstructed")
 
             // Decode back to value
@@ -861,24 +861,24 @@ class SymbolTest {
         val fields = message.toWSPRFields()
 
         // Callsign should be 6 characters, format: Letter-Letter-Digit-Letter-Letter-Letter
-        assertEquals(6, fields.first.length, "Callsign should be 6 characters")
-        assertTrue(fields.first[0].isLetter(), "Position 0 should be a letter")
-        assertTrue(fields.first[1].isLetter(), "Position 1 should be a letter")
-        assertTrue(fields.first[2].isDigit(), "Position 2 should be a digit")
-        assertTrue(fields.first[3].isLetter(), "Position 3 should be a letter")
-        assertTrue(fields.first[4].isLetter(), "Position 4 should be a letter")
-        assertTrue(fields.first[5].isLetter(), "Position 5 should be a letter")
+        assertEquals(6, fields.callsign.length, "Callsign should be 6 characters")
+        assertTrue(fields.callsign[0].isLetter(), "Position 0 should be a letter")
+        assertTrue(fields.callsign[1].isLetter(), "Position 1 should be a letter")
+        assertTrue(fields.callsign[2].isDigit(), "Position 2 should be a digit")
+        assertTrue(fields.callsign[3].isLetter(), "Position 3 should be a letter")
+        assertTrue(fields.callsign[4].isLetter(), "Position 4 should be a letter")
+        assertTrue(fields.callsign[5].isLetter(), "Position 5 should be a letter")
 
         // Grid should be 4 characters
-        assertEquals(4, fields.second.length, "Grid should be 4 characters")
+        assertEquals(4, fields.gridSquare.length, "Grid should be 4 characters")
 
         // Power should be a valid WSPR power level
         val validPowers = setOf(0, 3, 7, 10, 13, 17, 20, 23, 27, 30, 33, 37, 40, 43, 47, 50, 53, 57, 60)
-        assertTrue(validPowers.contains(fields.third), "Power should be valid WSPR level")
+        assertTrue(validPowers.contains(fields.powerDbm), "Power should be valid WSPR level")
 
-        println("Callsign: ${fields.first}")
-        println("Grid: ${fields.second}")
-        println("Power: ${fields.third} dBm")
+        println("Callsign: ${fields.callsign}")
+        println("Grid: ${fields.gridSquare}")
+        println("Power: ${fields.powerDbm} dBm")
         println("✓ All fields have correct format")
     }
 
@@ -907,7 +907,7 @@ class SymbolTest {
             val fieldsList = encoded.toWSPRFields()
             println("  Fields: ${fieldsList.size} triple(s)")
             fieldsList.forEachIndexed { i, f ->
-                println("    [$i] ${f.first}, ${f.second}, ${f.third}")
+                println("    [$i] ${f.callsign}, ${f.gridSquare}, ${f.powerDbm}")
             }
 
             // Reconstruct from fields
@@ -1080,7 +1080,7 @@ class SymbolTest {
 
         println("Encoded into ${fieldsForTransmission.size} WSPR messages")
         fieldsForTransmission.take(3).forEachIndexed { i, f ->
-            println("  Message $i: ${f.first} ${f.second} ${f.third}dBm")
+            println("  Message $i: ${f.callsign} ${f.gridSquare} ${f.powerDbm}dBm")
         }
         if (fieldsForTransmission.size > 3) {
             println("  ... and ${fieldsForTransmission.size - 3} more")
