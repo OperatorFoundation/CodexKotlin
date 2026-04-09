@@ -138,6 +138,47 @@ fun encodeUnencryptedPayload(plaintext: ByteArray): List<WSPRMessageFields>?
     }
 }
 
+
+/**
+ * Extracts the total expected spot count N from the first WSPR message (spot 0)
+ * of an unencrypted Nahoft transmission.
+ *
+ * N is packed into the upper [HEADER_BITS] bits of spot 0's numeric value by
+ * [encodeUnencryptedPayload]. The receiver calls this immediately after spot 0
+ * arrives to know how many total spots to accumulate before attempting decode,
+ * and to show an accurate progress denominator in the UI.
+ *
+ * N is the total spot count including spot 0 — the same definition used by
+ * [tryDecodeUnencryptedPayload]'s completion condition (receivedMessages.size == N).
+ *
+ * Returns N if the header is valid (1..[MAX_UNENCRYPTED_SPOTS]),
+ * null if malformed (N out of range or any decode error).
+ *
+ * @param spot0 The first WSPRMessage received in unencrypted mode
+ * @return Total expected spot count N, or null if the header is malformed
+ */
+fun extractUnencryptedSpotCount(spot0: WSPRMessage): Int?
+{
+    return try
+    {
+        val C = WSPRMessage.size() / BigInteger.valueOf(1L shl HEADER_BITS)
+        val N = (spot0.decode() / C).toInt()
+
+        if (N < 1 || N > MAX_UNENCRYPTED_SPOTS)
+        {
+            Timber.w("extractUnencryptedSpotCount: malformed header (N=$N), discarding")
+            null
+        }
+        else N
+    }
+    catch (e: Exception)
+    {
+        Timber.w(e, "extractUnencryptedSpotCount: failed to decode spot 0 header")
+        null
+    }
+}
+
+
 /**
  * Attempts to decode accumulated WSPR messages as an unencrypted plaintext payload.
  *
@@ -152,32 +193,21 @@ fun encodeUnencryptedPayload(plaintext: ByteArray): List<WSPRMessageFields>?
  * @param messages Accumulated WSPRMessages in reception order (spot 0 first)
  * @return Decoded UTF-8 plaintext if complete, null if still accumulating or malformed
  */
+
 fun tryDecodeUnencryptedPayload(messages: List<WSPRMessage>): String?
 {
     if (messages.isEmpty()) return null
 
     return try
     {
-        val messageSize = WSPRMessage.size()
-        val headerRange = BigInteger.valueOf(1L shl HEADER_BITS)
-        val C = messageSize / headerRange
-
-        // Extract N from the upper bits of spot 0
-        val spot0Value = messages[0].decode()
-        val N = (spot0Value / C).toInt()
-
-        // Discard malformed headers — N must be a valid spot count
-        if (N < 1 || N > MAX_UNENCRYPTED_SPOTS)
-        {
-            Timber.w("Unencrypted decode: malformed header in spot 0 (N=$N), discarding")
-            return null
-        }
+        val N = extractUnencryptedSpotCount(messages[0]) ?: return null
 
         // Not enough spots yet — caller should keep accumulating
         if (messages.size < N) return null
 
-        // Reconstruct payload BigInteger from spot 0 chunk + spots 1..N-1
-        val spot0PayloadChunk = spot0Value.mod(C)
+        // C is still needed locally for payload reconstruction arithmetic.
+        val C = WSPRMessage.size() / BigInteger.valueOf(1L shl HEADER_BITS)
+        val spot0PayloadChunk = messages[0].decode().mod(C)
 
         // Spots 1..N-1 carry the residual in standard mixed-radix (least significant first)
         var residual = BigInteger.ZERO
@@ -185,12 +215,12 @@ fun tryDecodeUnencryptedPayload(messages: List<WSPRMessage>): String?
         for (i in 1 until N)
         {
             residual = residual + messages[i].decode() * multiplier
-            multiplier = multiplier * messageSize
+            multiplier = multiplier * WSPRMessage.size()
         }
 
         val payloadBigInt = spot0PayloadChunk + C * residual
 
-        // Convert to bytes, stripping potential BigInteger two's-complement sign byte
+        // Strip potential BigInteger two's-complement sign byte
         val rawBytes = payloadBigInt.toByteArray()
         val payloadBytes = if (rawBytes.isNotEmpty() && rawBytes[0] == 0.toByte() && rawBytes.size > 1)
             rawBytes.copyOfRange(1, rawBytes.size)
@@ -203,7 +233,7 @@ fun tryDecodeUnencryptedPayload(messages: List<WSPRMessage>): String?
     }
     catch (e: Exception)
     {
-        // Not a warning — expected during normal accumulation
+        // Expected during normal accumulation
         Timber.d("Unencrypted decode attempt: ${e.message}")
         null
     }
